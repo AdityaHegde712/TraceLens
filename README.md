@@ -1,0 +1,21 @@
+# TraceLens: Evidence-Grounded Incident Triage Assistant
+
+TraceLens is an evidence-grounded incident triage virtual assistant for Python FastAPI Retrieval-Augmented Generation (RAG) services. Operating under a zero-monetary-cost constraint across local quantized models and remote endpoints, it automates root-cause diagnosis across logs, OpenTelemetry traces, time-series metrics, and configurations via deterministic verification and bounded autonomous reasoning.
+
+## Overview
+
+When user-facing RAG systems degrade (elevated latencies, hallucinated outputs, empty context retrievals, or upstream provider errors), determining the root cause traditionally requires manual correlation across fragmented observability silos. TraceLens provides automated, evidence-backed triage through a bounded ReAct finite state machine and a deterministic grounding verifier.
+
+### Key Capabilities
+
+- **Bounded ReAct FSM Loop:** Bounded investigation loop with strict invocation budgets, token thresholds, loop detection, and refusal guardrails against mutating commands.
+- **Typed Read-Only Telemetry Tools:** Safe, Pydantic-validated diagnostic tools inspecting logs, trace spans (DAGs), quantile metrics, configurations, runbooks, and prior incidents.
+- **Secret Sanitizer:** Automatic redaction of credentials, API tokens, and connection strings into deterministic SHA-256 masks before prompt ingestion.
+- **Deterministic Grounding Verification:** Bipartite hypothesis-evidence graph analysis that computes confidence and autonomously triggers abstentions on insufficient or contradictory evidence.
+- **Dual Interface:** Headless benchmark CLI with standardized exit codes and an interactive browser dashboard over WebSocket/SSE streaming typed events.
+- **Synthetic Fault Lab:** Simulation environment covering 12 canonical production RAG fault archetypes.
+
+## Documentation
+
+- [Project Proposal](docs/PROJECT_PROPOSAL.md)
+- [Project Ground Truth & Technical Architecture](docs/PROJECT_GROUND_TRUTH.md)

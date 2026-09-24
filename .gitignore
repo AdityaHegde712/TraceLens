@@ -1,0 +1,54 @@
+# Environment & secrets
+.env*
+*.env
+*.pem
+*.key
+*.cert
+*.crt
+
+# Agent tasks & workspaces
+.agent-tasks/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / Frontend / Build
+node_modules/
+dist/
+build/
+target/
+.next/
+out/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Large weights, binaries & datasets (>50MB)
+*.pt
+*.pth
+*.bin
+*.onnx
+*.tar.gz
+*.zip
+*.parquet
