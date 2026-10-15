@@ -89,19 +89,22 @@ class OllamaBackend(LLMBackend):
 
 
 class OpenAIBackend(LLMBackend):
-    """OpenAI-compatible inference backend (supports OpenAI, vLLM, DeepSeek, etc.)."""
+    """OpenAI-compatible inference backend (supports OpenAI, OpenRouter, vLLM, DeepSeek, etc.)."""
 
     def __init__(
         self,
-        model: str = "gpt-4o-mini",
-        api_key: str = "",
-        base_url: str = "https://api.openai.com/v1",
+        model: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
         timeout: float = 60.0,
     ) -> None:
-        """Initialize OpenAI connection parameters."""
-        self.model = model
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+        """Initialize OpenAI/OpenRouter connection parameters."""
+        from tracelens.config import get_settings
+
+        settings = get_settings()
+        self.model = model or settings.OPENROUTER_MODEL_DEFAULT
+        self.base_url = (base_url or settings.OPENROUTER_BASE_URL).rstrip("/")
+        self.api_key = api_key if api_key is not None else settings.OPENROUTER_API_KEY
         self.timeout = timeout
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
@@ -114,6 +117,8 @@ class OpenAIBackend(LLMBackend):
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/aditya-hegde/tracelens",
+            "X-Title": "TraceLens",
         }
         url = f"{self.base_url}/chat/completions"
         with httpx.Client(timeout=self.timeout) as client:
