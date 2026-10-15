@@ -40,6 +40,12 @@ def build_parser() -> argparse.ArgumentParser:
     bench_parser.add_argument("--mock", action="store_true", help="Force mock LLM backend")
     bench_parser.add_argument("--model", default="mock", help="Model identifier")
 
+    # UI command
+    ui_parser = subparsers.add_parser("ui", help="Launch interactive browser dashboard")
+    ui_parser.add_argument("--host", default="127.0.0.1", help="Server bind host")
+    ui_parser.add_argument("--port", type=int, default=8000, help="Server bind port")
+    ui_parser.add_argument("--reload", action="store_true", help="Enable live code reloading")
+
     return parser
 
 
@@ -151,6 +157,15 @@ def handle_benchmark(args: argparse.Namespace, console: Console) -> int:
     return 0
 
 
+def handle_ui(args: argparse.Namespace, console: Console) -> int:
+    """Launch the interactive browser dashboard server."""
+    import uvicorn
+
+    console.print(f"[bold cyan]Launching TraceLens UI on http://{args.host}:{args.port}...[/bold cyan]")
+    uvicorn.run("tracelens.web.server:app", host=args.host, port=args.port, reload=args.reload)
+    return 0
+
+
 def main(args: list[str] | None = None) -> int:
     """Entry point for the tracelens command-line tool."""
     parser = build_parser()
@@ -163,6 +178,8 @@ def main(args: list[str] | None = None) -> int:
         return handle_triage(parsed_args, console)
     elif parsed_args.command == "benchmark":
         return handle_benchmark(parsed_args, console)
+    elif parsed_args.command == "ui":
+        return handle_ui(parsed_args, console)
 
     return 1
 
