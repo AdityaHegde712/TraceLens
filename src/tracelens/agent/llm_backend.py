@@ -122,14 +122,21 @@ class OpenAIBackend(LLMBackend):
         }
         url = f"{self.base_url}/chat/completions"
         with httpx.Client(timeout=self.timeout) as client:
-            resp = client.post(
-                url,
-                headers=headers,
-                json={"model": self.model, "messages": messages},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            choices = data.get("choices", [])
-            if choices and "message" in choices[0]:
-                return str(choices[0]["message"].get("content", ""))
-            return ""
+            for attempt in range(3):
+                resp = client.post(
+                    url,
+                    headers=headers,
+                    json={"model": self.model, "messages": messages},
+                )
+                if resp.status_code == 429 and attempt < 2:
+                    import time
+
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                choices = data.get("choices", [])
+                if choices and "message" in choices[0]:
+                    return str(choices[0]["message"].get("content", ""))
+                return ""
+        return ""
