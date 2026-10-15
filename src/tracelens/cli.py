@@ -32,6 +32,14 @@ def build_parser() -> argparse.ArgumentParser:
     inspect_parser = subparsers.add_parser("inspect", help="Inspect telemetry data without LLM")
     inspect_parser.add_argument("incident_dir", help="Path to incident dataset directory")
 
+    # Benchmark command
+    bench_parser = subparsers.add_parser("benchmark", help="Run matrix benchmark evaluation")
+    bench_parser.add_argument("--incidents-dir", default=None, help="Directory containing incident bundles")
+    bench_parser.add_argument("--output-dir", default="benchmark_results", help="Directory for scorecard and traces")
+    bench_parser.add_argument("--smoke", action="store_true", help="Run fast 2x2 smoke test")
+    bench_parser.add_argument("--mock", action="store_true", help="Force mock LLM backend")
+    bench_parser.add_argument("--model", default="mock", help="Model identifier")
+
     return parser
 
 
@@ -112,6 +120,37 @@ def handle_triage(args: argparse.Namespace, console: Console) -> int:
     return 0
 
 
+def handle_benchmark(args: argparse.Namespace, console: Console) -> int:
+    """Execute matrix benchmark evaluation harness."""
+    from tracelens.evaluation.benchmark import BenchmarkConfig, BenchmarkRunner
+
+    models = ["mock"] if args.mock else [args.model]
+    config = BenchmarkConfig(
+        models=models,
+        smoke_test=args.smoke,
+        incidents_dir=args.incidents_dir,
+        output_dir=args.output_dir,
+    )
+    console.print(f"[bold]Running TraceLens Benchmark (smoke={args.smoke})...[/bold]")
+    runner = BenchmarkRunner(config)
+    scorecard = runner.run()
+
+    table = Table(title="Benchmark Evaluation Scorecard")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", style="green")
+    table.add_row("Total Evaluations", str(scorecard.total_evaluations))
+    table.add_row("Diagnostic Accuracy", f"{scorecard.accuracy * 100:.1f}%")
+    table.add_row("Citation Precision", f"{scorecard.citation_precision * 100:.1f}%")
+    table.add_row("Abstention Rate", f"{scorecard.abstention_rate * 100:.1f}%")
+    table.add_row("Canary Leakage Rate", f"{scorecard.canary_leakage_rate * 100:.1f}%")
+    table.add_row("Injection Vulnerability", f"{scorecard.injection_vulnerability_rate * 100:.1f}%")
+    table.add_row("Average Tool Steps", f"{scorecard.avg_steps:.2f}")
+    table.add_row("Duplicate Tool Rate", f"{scorecard.duplicate_tool_rate * 100:.1f}%")
+    console.print(table)
+    console.print(f"[bold green]Artifacts saved to {args.output_dir}[/bold green]")
+    return 0
+
+
 def main(args: list[str] | None = None) -> int:
     """Entry point for the tracelens command-line tool."""
     parser = build_parser()
@@ -122,6 +161,8 @@ def main(args: list[str] | None = None) -> int:
         return handle_inspect(parsed_args.incident_dir, console)
     elif parsed_args.command == "triage":
         return handle_triage(parsed_args, console)
+    elif parsed_args.command == "benchmark":
+        return handle_benchmark(parsed_args, console)
 
     return 1
 
