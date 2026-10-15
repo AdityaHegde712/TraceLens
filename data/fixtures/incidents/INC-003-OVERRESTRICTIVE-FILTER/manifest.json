@@ -1,0 +1,12 @@
+{
+  "incident_id": "INC-003-OVERRESTRICTIVE-FILTER",
+  "title": "Overrestrictive Metadata Filter Culling",
+  "symptom": "Empty retrieval candidate lists for enterprise customer queries",
+  "start_time": "2026-10-15T10:00:00Z",
+  "end_time": "2026-10-15T10:30:00Z",
+  "ground_truth_root_cause": "Tenant metadata filter hardcoded 'tenant_id==prod_global' dropping tenant-specific partitioned documents",
+  "services_involved": [
+    "retrieval-service",
+    "api-gateway"
+  ]
+}

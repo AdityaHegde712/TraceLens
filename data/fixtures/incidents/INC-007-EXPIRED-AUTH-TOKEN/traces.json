@@ -1,0 +1,12 @@
+[
+  {
+    "trace_id": "tr-007",
+    "span_id": "sp-007-1",
+    "parent_span_id": null,
+    "name": "POST /v1/completions",
+    "start_time_ms": 10.0,
+    "end_time_ms": 85.0,
+    "attributes": {},
+    "status": "error"
+  }
+]

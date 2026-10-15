@@ -1,0 +1,10 @@
+[
+  {
+    "service": "worker-queue",
+    "version": "v2.3.0",
+    "settings": {
+      "max_queue_buffer_mb": 4096,
+      "overflow_action": "buffer_in_ram"
+    }
+  }
+]

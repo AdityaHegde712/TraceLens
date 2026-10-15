@@ -1,0 +1,15 @@
+[
+  {
+    "timestamp": "2026-10-15T12:02:00Z",
+    "level": "ERROR",
+    "service": "vector-db",
+    "message": "VectorDimensionMismatchError: query vector dimension (3072) does not match collection dimension (1536)",
+    "attributes": {
+      "collection": "enterprise_docs",
+      "expected_dim": 1536,
+      "received_dim": 3072
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

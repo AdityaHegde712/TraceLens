@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-10-15T08:30:00Z",
+    "metric_name": "rag_corpus_staleness_hours",
+    "value": 720.0,
+    "labels": {
+      "collection": "kb_articles"
+    }
+  }
+]

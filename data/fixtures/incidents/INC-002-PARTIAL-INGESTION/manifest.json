@@ -1,0 +1,13 @@
+{
+  "incident_id": "INC-002-PARTIAL-INGESTION",
+  "title": "Partial Document Ingestion Failure",
+  "symptom": "Queries regarding quarterly revenue return 'I do not have enough context'",
+  "start_time": "2026-10-15T09:00:00Z",
+  "end_time": "2026-10-15T09:45:00Z",
+  "ground_truth_root_cause": "PDF parser unhandled exception on table formatting caused 45% of financial report chunks to be dropped before embedding",
+  "services_involved": [
+    "document-ingestor",
+    "embedding-worker",
+    "retrieval-service"
+  ]
+}

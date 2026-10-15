@@ -1,0 +1,10 @@
+[
+  {
+    "service": "query-encoder",
+    "version": "v4.0.0",
+    "settings": {
+      "model_name": "text-embedding-3-large",
+      "output_dim": 3072
+    }
+  }
+]

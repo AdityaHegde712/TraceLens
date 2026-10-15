@@ -1,0 +1,13 @@
+{
+  "incident_id": "INC-011-MULTI-CAUSE-FAILURE",
+  "title": "Multi-Cause Failure: Rate Limit Throttling and Memory Leak",
+  "symptom": "Degraded response times coupled with worker pod crash loops",
+  "start_time": "2026-10-15T18:00:00Z",
+  "end_time": "2026-10-15T18:50:00Z",
+  "ground_truth_root_cause": "Dual failure: Upstream provider 429 rate limiting caused requests to queue, triggering buffer leak in worker pod OOM",
+  "services_involved": [
+    "retrieval-service",
+    "llm-gateway",
+    "worker-queue"
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "trace_id": "tr-008",
+    "span_id": "sp-008-1",
+    "parent_span_id": null,
+    "name": "POST /chat",
+    "start_time_ms": 0.0,
+    "end_time_ms": 8500.0,
+    "attributes": {},
+    "status": "error"
+  }
+]

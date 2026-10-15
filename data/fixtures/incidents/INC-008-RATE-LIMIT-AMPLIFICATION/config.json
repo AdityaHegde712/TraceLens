@@ -1,0 +1,11 @@
+[
+  {
+    "service": "retry-middleware",
+    "version": "v2.0.0",
+    "settings": {
+      "max_retries": 5,
+      "jitter": false,
+      "backoff_multiplier": 1.1
+    }
+  }
+]

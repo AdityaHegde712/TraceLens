@@ -1,0 +1,10 @@
+[
+  {
+    "service": "api-gateway",
+    "version": "v1.25.0",
+    "settings": {
+      "proxy_read_timeout": "60s",
+      "proxy_connect_timeout": "5s"
+    }
+  }
+]

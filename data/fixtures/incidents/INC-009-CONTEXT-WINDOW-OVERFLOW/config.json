@@ -1,0 +1,10 @@
+[
+  {
+    "service": "prompt-formatter",
+    "version": "v1.2.0",
+    "settings": {
+      "truncate_history": false,
+      "max_chunks": 20
+    }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "incident_id": "INC-006-VECTOR-STORE-LATENCY",
+  "title": "Vector DB Latency Spike from Unindexed Collection",
+  "symptom": "P99 search latency degraded from 80ms to 4200ms",
+  "start_time": "2026-10-15T13:00:00Z",
+  "end_time": "2026-10-15T13:40:00Z",
+  "ground_truth_root_cause": "HNSW index dropped during collection compaction, forcing Milvus into brute-force IVF_FLAT sequential scan",
+  "services_involved": [
+    "vector-db",
+    "retrieval-service"
+  ]
+}

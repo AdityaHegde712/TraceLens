@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-10-15T08:05:00Z",
+    "level": "WARN",
+    "service": "etl-pipeline",
+    "message": "Partition refresh skipped: schema mismatch in upstream CMS payload",
+    "attributes": {
+      "collection": "kb_articles",
+      "partition": "2026_q4"
+    },
+    "trace_id": null,
+    "span_id": null
+  },
+  {
+    "timestamp": "2026-10-15T08:15:00Z",
+    "level": "INFO",
+    "service": "retrieval-service",
+    "message": "Query retrieved top_k=5 documents from partition 2024_q4",
+    "attributes": {
+      "collection": "kb_articles",
+      "active_partition": "2024_q4"
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

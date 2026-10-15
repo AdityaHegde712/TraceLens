@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-10-15T11:05:00Z",
+    "level": "INFO",
+    "service": "retrieval-service",
+    "message": "Retrieved 20 candidates, but all fell below min_score_threshold=0.95 (max observed: 0.88)",
+    "attributes": {
+      "min_score_threshold": 0.95,
+      "top_candidate_score": 0.88
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

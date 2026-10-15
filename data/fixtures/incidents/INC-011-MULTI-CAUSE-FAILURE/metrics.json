@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": "2026-10-15T18:15:00Z",
+    "metric_name": "pod_memory_utilization_ratio",
+    "value": 0.98,
+    "labels": {
+      "pod": "worker-queue-0"
+    }
+  },
+  {
+    "timestamp": "2026-10-15T18:15:00Z",
+    "metric_name": "http_429_count",
+    "value": 45.0,
+    "labels": {
+      "service": "llm-gateway"
+    }
+  }
+]

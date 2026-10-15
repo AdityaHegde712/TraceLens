@@ -1,0 +1,10 @@
+[
+  {
+    "service": "retrieval-service",
+    "version": "v3.0.1",
+    "settings": {
+      "enforce_strict_tenant_filter": true,
+      "default_tenant": "prod_global"
+    }
+  }
+]

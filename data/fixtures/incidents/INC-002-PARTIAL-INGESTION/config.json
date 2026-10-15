@@ -1,0 +1,11 @@
+[
+  {
+    "service": "document-ingestor",
+    "version": "v2.1.0",
+    "settings": {
+      "chunk_size": 512,
+      "chunk_overlap": 64,
+      "ignore_parse_errors": true
+    }
+  }
+]

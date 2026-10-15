@@ -1,0 +1,25 @@
+[
+  {
+    "timestamp": "2026-10-15T09:10:00Z",
+    "level": "ERROR",
+    "service": "document-ingestor",
+    "message": "PDFParseException: Table chunk parsing failed for doc_id=fin_2026_q3.pdf chunk_idx=14",
+    "attributes": {
+      "doc_id": "fin_2026_q3.pdf",
+      "skipped_chunks": 18
+    },
+    "trace_id": null,
+    "span_id": null
+  },
+  {
+    "timestamp": "2026-10-15T09:20:00Z",
+    "level": "WARN",
+    "service": "retrieval-service",
+    "message": "Low retrieval relevance score 0.32 for query 'Q3 financial revenue report'",
+    "attributes": {
+      "query": "Q3 financial revenue report"
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

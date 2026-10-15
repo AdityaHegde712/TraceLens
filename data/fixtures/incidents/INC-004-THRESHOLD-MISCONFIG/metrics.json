@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-10-15T11:15:00Z",
+    "metric_name": "rag_post_filter_candidate_count",
+    "value": 0.0,
+    "labels": {
+      "service": "retrieval-service"
+    }
+  }
+]

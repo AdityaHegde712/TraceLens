@@ -1,0 +1,22 @@
+[
+  {
+    "trace_id": "tr-001",
+    "span_id": "sp-001-1",
+    "parent_span_id": null,
+    "name": "GET /v1/query",
+    "start_time_ms": 100.0,
+    "end_time_ms": 350.0,
+    "attributes": {},
+    "status": "ok"
+  },
+  {
+    "trace_id": "tr-001",
+    "span_id": "sp-001-2",
+    "parent_span_id": "sp-001-1",
+    "name": "milvus_vector_search",
+    "start_time_ms": 120.0,
+    "end_time_ms": 300.0,
+    "attributes": {},
+    "status": "ok"
+  }
+]

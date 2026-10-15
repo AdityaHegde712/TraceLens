@@ -1,0 +1,10 @@
+[
+  {
+    "service": "llm-gateway",
+    "version": "v1.4.0",
+    "settings": {
+      "provider": "openai",
+      "api_key": "sk-proj-expiredKey12345678"
+    }
+  }
+]

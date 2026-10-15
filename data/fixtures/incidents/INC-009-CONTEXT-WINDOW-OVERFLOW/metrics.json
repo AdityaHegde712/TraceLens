@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-10-15T16:10:00Z",
+    "metric_name": "prompt_token_count_max",
+    "value": 135400.0,
+    "labels": {
+      "model": "gpt-4o"
+    }
+  }
+]

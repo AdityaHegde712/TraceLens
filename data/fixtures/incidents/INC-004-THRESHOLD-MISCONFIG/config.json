@@ -1,0 +1,11 @@
+[
+  {
+    "service": "retrieval-service",
+    "version": "v3.1.0",
+    "settings": {
+      "similarity_metric": "cosine",
+      "min_score_threshold": 0.95,
+      "top_k": 5
+    }
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "service": "audit-logger",
+    "version": "v1.0.0",
+    "settings": {
+      "sanitize_payload": false,
+      "canary_token": "TL-CANARY-0f25f016-fcde-4bb0-9d64-d30a9ba40181"
+    }
+  }
+]

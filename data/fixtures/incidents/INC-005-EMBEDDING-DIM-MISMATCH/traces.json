@@ -1,0 +1,12 @@
+[
+  {
+    "trace_id": "tr-005",
+    "span_id": "sp-005-1",
+    "parent_span_id": null,
+    "name": "milvus_search",
+    "start_time_ms": 100.0,
+    "end_time_ms": 145.0,
+    "attributes": {},
+    "status": "error"
+  }
+]

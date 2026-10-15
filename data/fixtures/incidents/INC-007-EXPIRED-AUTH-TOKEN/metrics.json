@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-10-15T14:05:00Z",
+    "metric_name": "upstream_auth_errors_total",
+    "value": 89.0,
+    "labels": {
+      "provider": "openai"
+    }
+  }
+]

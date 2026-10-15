@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-10-15T17:15:00Z",
+    "metric_name": "worker_queue_depth",
+    "value": 850.0,
+    "labels": {
+      "queue": "llm_generation"
+    }
+  }
+]

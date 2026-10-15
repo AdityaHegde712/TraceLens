@@ -1,0 +1,11 @@
+[
+  {
+    "service": "vector-db",
+    "version": "v2.4.2",
+    "settings": {
+      "index_type": "HNSW",
+      "M": 16,
+      "efConstruction": 200
+    }
+  }
+]

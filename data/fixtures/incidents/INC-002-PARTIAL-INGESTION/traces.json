@@ -1,0 +1,12 @@
+[
+  {
+    "trace_id": "tr-002",
+    "span_id": "sp-002-1",
+    "parent_span_id": null,
+    "name": "POST /ingest",
+    "start_time_ms": 10.0,
+    "end_time_ms": 500.0,
+    "attributes": {},
+    "status": "error"
+  }
+]

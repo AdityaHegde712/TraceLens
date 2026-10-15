@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-10-15T09:15:00Z",
+    "metric_name": "ingestion_failure_chunk_ratio",
+    "value": 0.45,
+    "labels": {
+      "pipeline": "pdf_loader"
+    }
+  }
+]

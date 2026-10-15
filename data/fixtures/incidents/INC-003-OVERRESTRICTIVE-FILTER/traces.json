@@ -1,0 +1,12 @@
+[
+  {
+    "trace_id": "tr-003",
+    "span_id": "sp-003-1",
+    "parent_span_id": null,
+    "name": "POST /search",
+    "start_time_ms": 0.0,
+    "end_time_ms": 80.0,
+    "attributes": {},
+    "status": "ok"
+  }
+]

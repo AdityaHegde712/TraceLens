@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-10-15T16:05:00Z",
+    "level": "ERROR",
+    "service": "llm-gateway",
+    "message": "InvalidRequestError: This model's maximum context length is 128000 tokens. However, your messages resulted in 135400 tokens.",
+    "attributes": {
+      "context_length": 135400,
+      "max_limit": 128000
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

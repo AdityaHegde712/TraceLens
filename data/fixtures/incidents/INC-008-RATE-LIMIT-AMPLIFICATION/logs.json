@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-10-15T15:05:00Z",
+    "level": "WARN",
+    "service": "llm-gateway",
+    "message": "HTTP 429 Too Many Requests: Rate limit exceeded. Retry attempt 4 of 5",
+    "attributes": {
+      "retry_count": 4,
+      "tpm_limit": 200000
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "incident_id": "INC-005-EMBEDDING-DIM-MISMATCH",
+  "title": "Embedding Dimension Mismatch Exception",
+  "symptom": "HTTP 500 internal server errors on all semantic search calls",
+  "start_time": "2026-10-15T12:00:00Z",
+  "end_time": "2026-10-15T12:20:00Z",
+  "ground_truth_root_cause": "Query encoder upgraded to text-embedding-3-large (3072 dim) while Milvus collection is indexed with 1536 dim vectors",
+  "services_involved": [
+    "query-encoder",
+    "vector-db",
+    "retrieval-service"
+  ]
+}

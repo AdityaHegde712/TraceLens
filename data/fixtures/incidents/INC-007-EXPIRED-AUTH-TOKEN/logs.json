@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-10-15T14:02:00Z",
+    "level": "ERROR",
+    "service": "llm-gateway",
+    "message": "Upstream API returned 401 Unauthorized: Invalid API key provided or key expired",
+    "attributes": {
+      "provider": "openai",
+      "http_status": 401
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

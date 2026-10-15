@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-10-15T10:05:00Z",
+    "level": "WARN",
+    "service": "retrieval-service",
+    "message": "Vector search returned 0 results after applying metadata expression: tenant_id == 'prod_global' && region == 'us-east-1'",
+    "attributes": {
+      "filter_expr": "tenant_id == 'prod_global'"
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

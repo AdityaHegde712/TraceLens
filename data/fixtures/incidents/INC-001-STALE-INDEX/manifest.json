@@ -1,0 +1,13 @@
+{
+  "incident_id": "INC-001-STALE-INDEX",
+  "title": "Outdated Vector Corpus & Stale Indexing",
+  "symptom": "RAG API answers user questions using outdated 2024 policy documents",
+  "start_time": "2026-10-15T08:00:00Z",
+  "end_time": "2026-10-15T09:00:00Z",
+  "ground_truth_root_cause": "Nightly ETL ingestion pipeline failed to refresh Milvus collection partition after CMS schema update",
+  "services_involved": [
+    "etl-pipeline",
+    "retrieval-service",
+    "vector-db"
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-10-15T13:05:00Z",
+    "level": "WARN",
+    "service": "vector-db",
+    "message": "Segment search falling back to sequential scan: index_status=UNINDEXED segment_id=44912",
+    "attributes": {
+      "segment_id": 44912,
+      "index_type": "FLAT"
+    },
+    "trace_id": null,
+    "span_id": null
+  }
+]

@@ -59,12 +59,12 @@ def handle_inspect(incident_dir: str, console: Console) -> int:
 
         console.print("\n[bold]Critical Path Analysis:[/bold]")
         for node in critical_path:
-            console.print(f"  └─ {node.span.name} ({node.duration_ms:.1f}ms) [status={node.span.status}]")
+            console.print(f"  |-- {node.span.name} ({node.duration_ms:.1f}ms) [status={node.span.status}]")
 
         if bottlenecks:
             console.print("\n[bold red]Detected Bottlenecks:[/bold red]")
             for b in bottlenecks:
-                console.print(f"  ⚠️  Span {b.span.span_id} ({b.span.name}): self-time {b.self_time_ms:.1f}ms")
+                console.print(f"  [!] Span {b.span.span_id} ({b.span.name}): self-time {b.self_time_ms:.1f}ms")
 
     return 0
 
@@ -105,7 +105,7 @@ def handle_triage(args: argparse.Namespace, console: Console) -> int:
     if report.hypotheses:
         console.print("\n[bold]Evaluated Hypotheses:[/bold]")
         for h in report.hypotheses:
-            console.print(f"  • [bold]{h.title}[/bold] (Confidence: {h.confidence:.2f}, Support: {h.support_count}, Refute: {h.refutation_count})")
+            console.print(f"  * [bold]{h.title}[/bold] (Confidence: {h.confidence:.2f}, Support: {h.support_count}, Refute: {h.refutation_count})")
             for e in h.evidence_links:
                 console.print(f"    - [{e.polarity.value.upper()}] ({e.source_type}): {e.description} (score: {e.relevance_score})")
 
