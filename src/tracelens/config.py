@@ -6,6 +6,7 @@ supporting local Ollama models and remote OpenRouter cloud frontiers.
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Automatically load .env file from the current working directory or project root
@@ -29,8 +30,8 @@ class Settings:
         self.OPENROUTER_MODEL_DEFAULT = os.getenv(
             "OPENROUTER_MODEL_DEFAULT", "openrouter/free"
         )
-        self.MODEL_1 = os.getenv("MODEL_1", "poolside/laguna-s-2.1:free")
-        self.MODEL_2 = os.getenv("MODEL_2", "thinkingmachines/inkling:free")
+        self.MODEL_1 = os.getenv("MODEL_1", "baidu/ernie-5.5-flash-preview:free")
+        self.MODEL_2 = os.getenv("MODEL_2", "nvidia/nemotron-3-ultra-550b-a55b:free")
         self.TRACELENS_HOST = os.getenv("TRACELENS_HOST", "127.0.0.1")
         self.TRACELENS_PORT = int(os.getenv("TRACELENS_PORT", "8000"))
 

@@ -5,9 +5,9 @@ bounded ReAct triage execution, and Server-Sent Events (SSE) live streaming.
 """
 
 import json
+import uuid
 from pathlib import Path
 from typing import Any
-import uuid
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,8 +15,9 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from tracelens.agent.llm_backend import MockLLMBackend, OllamaBackend, OpenAIBackend
+from tracelens.agent.llm_backend import create_backend
 from tracelens.agent.react_loop import BoundedReActAgent
+from tracelens.discovery import discover_free_models
 from tracelens.fault_lab.generator import generate_all_bundles
 from tracelens.models.triage import TriageReport
 from tracelens.telemetry.reader import IncidentBundle, IncidentReader
@@ -76,6 +77,12 @@ def list_incidents() -> list[dict[str, Any]]:
             "start_time": str(bundle.manifest.start_time),
         })
     return summaries
+
+
+@app.get("/api/models")
+def list_models() -> list[dict[str, Any]]:
+    """Discover available free-tier and configured local models."""
+    return discover_free_models()
 
 
 @app.get("/api/incidents/{incident_id}")
@@ -176,17 +183,12 @@ def start_triage(payload: TriageRequest) -> dict[str, Any]:
                     }
                 ],
             })
-        backend = MockLLMBackend(default_response=canned)
-    elif payload.api_key or "openai" in payload.model or "gpt" in payload.model:
-        backend = OpenAIBackend(
-            model=payload.model,
-            api_key=payload.api_key or "",
-            base_url=payload.base_url or "https://api.openai.com/v1",
-        )
+        backend = create_backend("mock", default_response=canned)
     else:
-        backend = OllamaBackend(
+        backend = create_backend(
             model=payload.model,
-            base_url=payload.base_url or "http://localhost:11434",
+            api_key=payload.api_key,
+            base_url=payload.base_url,
         )
 
     max_steps = 1 if payload.workflow == "fixed" else 5

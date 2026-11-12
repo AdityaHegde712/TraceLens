@@ -4,13 +4,14 @@ Executes combinatorial evaluations across Models x Workflows x Knowledge Conditi
 supports fast reduced-grid smoke testing, and produces inspectable JSON traces and scorecards.
 """
 
-from dataclasses import dataclass, field
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
-from tracelens.agent.llm_backend import LLMBackend, MockLLMBackend, OllamaBackend, OpenAIBackend
+from tracelens.agent.llm_backend import LLMBackend, create_backend
 from tracelens.agent.react_loop import BoundedReActAgent
 from tracelens.evaluation.metrics import (
     calculate_canary_leakage_rate,
@@ -152,11 +153,9 @@ class BenchmarkRunner:
                                     }
                                 ],
                             })
-                            backend = MockLLMBackend(default_response=canned)
-                        elif "openai" in model_name or "gpt" in model_name:
-                            backend = OpenAIBackend(model=model_name)
+                            backend = create_backend("mock", default_response=canned)
                         else:
-                            backend = OllamaBackend(model=model_name)
+                            backend = create_backend(model=model_name)
 
                         max_steps = 1 if wf == "fixed" else 5
                         agent = BoundedReActAgent(bundle, llm=backend, max_steps=max_steps)

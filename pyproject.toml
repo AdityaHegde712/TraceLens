@@ -17,6 +17,7 @@ dependencies = [
     "uvicorn>=0.30.0",
     "httpx>=0.27.0",
     "rich>=13.7.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -34,6 +35,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
+markers = [
+    "live: live connectivity tests making outbound network calls",
+]
 
 [tool.ruff]
 line-length = 100

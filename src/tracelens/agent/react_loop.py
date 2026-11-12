@@ -4,11 +4,14 @@ Enforces finite-state safety invariants including read-only mutation guards,
 loop repetition detection, bounded step budgets, and dual-polarity evidence grounding.
 """
 
+import json
+import logging
+import re
 from collections import Counter
 from enum import Enum
-import json
-import re
 from typing import Any
+
+from pydantic import ValidationError
 
 from tracelens.agent.llm_backend import LLMBackend, MockLLMBackend
 from tracelens.agent.tools import (
@@ -26,6 +29,8 @@ from tracelens.telemetry.reader import IncidentBundle
 DANGEROUS_MUTATION_PATTERN = re.compile(
     r"(?i)\b(restart|reboot|delete|drop|kill|terminate|truncate|update|write|modify|exec|bash|sh|rm\s+-rf)\b"
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AgentState(str, Enum):
@@ -57,6 +62,47 @@ Output format: Return valid JSON with keys:
   "action": "tool_name or finish",
   "args": { ... },
   "hypotheses": [ ... ] (when action is finish)
+}
+
+Few-shot diagnostic example:
+User Symptom: "High P99 latency and intermittent 504 timeouts on /query"
+Step 1:
+{
+  "thought": "First, inspect error logs from the retrieval service to identify exceptions.",
+  "action": "log_search",
+  "args": {"service": "retrieval-service", "level": "ERROR"}
+}
+Observation: [{"timestamp": "...", "service": "retrieval-service", "message": "Upstream timeout to vector-db"}]
+
+Step 2:
+{
+  "thought": "Log shows vector-db timeout. Inspect distributed trace to identify the bottleneck span.",
+  "action": "trace_inspect",
+  "args": {"trace_id": "tr-001"}
+}
+Observation: {"critical_path": [{"span_id": "sp-2", "name": "milvus_search", "duration_ms": 4200.0}], "bottlenecks": [{"span_id": "sp-2", "self_time_ms": 4150.0}]}
+
+Step 3:
+{
+  "thought": "Trace bottleneck confirms milvus_search took 4.15s. Ground diagnosis with evidence citations.",
+  "action": "finish",
+  "hypotheses": [
+    {
+      "hypothesis_id": "H1",
+      "title": "Vector Store Search Bottleneck",
+      "description": "Milvus vector query latency degraded causing gateway 504 timeouts.",
+      "confidence": 0.95,
+      "evidence_links": [
+        {
+          "evidence_id": "sp-2",
+          "source_type": "trace",
+          "polarity": "support",
+          "description": "Span milvus_search latency 4150ms bottleneck",
+          "relevance_score": 0.95
+        }
+      ]
+    }
+  ]
 }
 """
 
@@ -125,8 +171,10 @@ class BoundedReActAgent:
             llm_output = self.llm.generate(prompt=prompt, system_prompt=SYSTEM_PROMPT)
 
             parsed = self._parse_llm_output(llm_output)
-            action = parsed.get("action", "")
+            action = str(parsed.get("action", "")).strip().lower()
             args = parsed.get("args", {})
+            if not isinstance(args, dict):
+                args = {}
 
             # Check if LLM finished
             if action == "finish" or "hypotheses" in parsed:
@@ -150,7 +198,8 @@ class BoundedReActAgent:
             tool = self.tools[action]
             try:
                 observation = tool.execute(**args)
-            except Exception as e:
+            except (ValueError, KeyError, TypeError, RuntimeError) as e:
+                logger.warning("Tool execution error for action %s: %s", action, e)
                 observation = {"error": str(e)}
 
             self.scratchpad.append({
@@ -195,21 +244,49 @@ class BoundedReActAgent:
         )
 
     def _parse_llm_output(self, raw: str) -> dict[str, Any]:
-        """Safely extract structured JSON payload from LLM response."""
+        """Safely extract structured JSON payload from LLM response.
+
+        Handles markdown code fences (```json ... ```), embedded JSON objects,
+        and provides resilient fallback if JSON is incomplete or malformed.
+        """
+        cleaned = raw.strip()
+
+        # 1. Direct JSON parse
         try:
-            return json.loads(raw)
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, dict):
+                return self._normalize_parsed_action(parsed)
         except json.JSONDecodeError:
             pass
 
-        # Try regex search for embedded JSON block
-        json_match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if json_match:
+        # 2. Markdown fenced block extraction: ```json ... ``` or ``` ... ```
+        fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, re.DOTALL | re.IGNORECASE)
+        if fence_match:
             try:
-                return json.loads(json_match.group(0))
+                parsed = json.loads(fence_match.group(1))
+                if isinstance(parsed, dict):
+                    return self._normalize_parsed_action(parsed)
             except json.JSONDecodeError:
                 pass
 
-        return {"thought": raw, "action": "finish"}
+        # 3. Outer brace matching for embedded JSON object
+        outer_match = re.search(r"(\{.*\})", cleaned, re.DOTALL)
+        if outer_match:
+            try:
+                parsed = json.loads(outer_match.group(1))
+                if isinstance(parsed, dict):
+                    return self._normalize_parsed_action(parsed)
+            except json.JSONDecodeError:
+                pass
+
+        # 4. Fallback: extract thoughts safely and default to finish
+        return {"thought": cleaned, "action": "finish", "args": {}, "hypotheses": []}
+
+    def _normalize_parsed_action(self, parsed: dict[str, Any]) -> dict[str, Any]:
+        """Normalize action string by stripping whitespace and lowercasing."""
+        if "action" in parsed and isinstance(parsed["action"], str):
+            parsed["action"] = parsed["action"].strip().lower()
+        return parsed
 
     def _extract_hypotheses(self, parsed: dict[str, Any]) -> list[Hypothesis]:
         """Extract and validate Hypothesis objects from LLM finish action."""
@@ -218,6 +295,7 @@ class BoundedReActAgent:
         for h_dict in hyp_list:
             try:
                 extracted.append(Hypothesis.model_validate(h_dict))
-            except Exception:
+            except (ValidationError, TypeError, ValueError) as exc:
+                logger.debug("Skipping invalid hypothesis dictionary %s: %s", h_dict, exc)
                 continue
         return extracted

@@ -35,10 +35,10 @@ class TestConfigCatalog:
         assert "cloud_large" in settings.TIER_MODELS
         assert "cloud_frontier" in settings.TIER_MODELS
 
-        assert settings.TIER_MODELS["local_small"] == "llama3.2:3b"
+        assert settings.TIER_MODELS["local_small"] == settings.OLLAMA_MODEL_DEFAULT
         assert settings.TIER_MODELS["local_mid"] == "qwen2.5:7b"
-        assert settings.TIER_MODELS["cloud_large"] == "poolside/laguna-s-2.1:free"
-        assert settings.TIER_MODELS["cloud_frontier"] == "thinkingmachines/inkling:free"
+        assert settings.TIER_MODELS["cloud_large"] == settings.MODEL_1
+        assert settings.TIER_MODELS["cloud_frontier"] == settings.MODEL_2
 
     def test_module_level_exports(self):
         assert OLLAMA_BASE_URL == "http://127.0.0.1:11434"

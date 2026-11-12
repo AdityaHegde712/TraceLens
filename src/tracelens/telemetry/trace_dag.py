@@ -5,6 +5,7 @@ calculates self-times, identifies the critical path, and detects bottlenecks.
 """
 
 from __future__ import annotations
+
 from tracelens.models.telemetry import TraceSpan
 
 

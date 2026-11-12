@@ -8,6 +8,7 @@ Strict TDD suite locking behavior for:
 
 import json
 from pathlib import Path
+
 import pytest
 
 from tracelens.models.telemetry import (
@@ -20,7 +21,6 @@ from tracelens.telemetry.sanitizer import (
     generate_canary,
 )
 from tracelens.telemetry.trace_dag import TraceDAG
-
 
 # =====================================================================
 # 1. Sanitizer Tests

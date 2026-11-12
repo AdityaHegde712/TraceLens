@@ -3,7 +3,8 @@
 Strict TDD suite: All models and their behavioral constraints are locked here.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 import pytest
 from pydantic import ValidationError
 
@@ -28,7 +29,7 @@ class TestTelemetryModels:
 
     def test_log_entry_valid(self):
         entry = LogEntry(
-            timestamp=datetime(2026, 10, 15, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 10, 15, 12, 0, 0, tzinfo=UTC),
             level="ERROR",
             service="retrieval-service",
             message="Vector index connection timed out",

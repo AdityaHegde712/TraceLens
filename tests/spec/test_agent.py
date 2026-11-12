@@ -16,6 +16,7 @@ from tracelens.agent.llm_backend import (
     MockLLMBackend,
     OllamaBackend,
     OpenAIBackend,
+    create_backend,
 )
 from tracelens.agent.react_loop import (
     AgentState,
@@ -174,6 +175,25 @@ class TestLLMBackend:
         backend = OpenAIBackend(model="gpt-4o-mini", api_key="sk-test", base_url="https://api.openai.com/v1")
         assert isinstance(backend, LLMBackend)
         assert backend.model == "gpt-4o-mini"
+
+    def test_create_backend_dispatch(self):
+        # 1. Mock
+        b_mock = create_backend("mock")
+        assert isinstance(b_mock, MockLLMBackend)
+
+        # 2. OpenRouter model with '/' or ':free'
+        b_free = create_backend("poolside/laguna-s-2.1:free")
+        assert isinstance(b_free, OpenAIBackend)
+        assert b_free.model == "poolside/laguna-s-2.1:free"
+
+        # 3. Model with api_key
+        b_key = create_backend("any-model", api_key="sk-test-123")
+        assert isinstance(b_key, OpenAIBackend)
+
+        # 4. Ollama local model
+        b_ollama = create_backend("llama3.2:3b")
+        assert isinstance(b_ollama, OllamaBackend)
+        assert b_ollama.model == "llama3.2:3b"
 
 
 # =====================================================================
@@ -334,6 +354,55 @@ class TestBoundedReActLoop:
         assert report.confidence >= 0.8
         assert len(report.hypotheses) == 1
 
+    def test_markdown_fenced_json_parsing(self, sample_bundle):
+        fenced_output = """Here is my analysis:
+```json
+{
+  "thought": "Checking logs for milvus",
+  "action": " LOG_SEARCH ",
+  "args": {"service": "milvus-db"}
+}
+```
+"""
+        finish_output = """```
+{
+  "thought": "Diagnosed root cause",
+  "action": "FINISH",
+  "hypotheses": [
+    {
+      "hypothesis_id": "H1",
+      "title": "OOM Crash",
+      "description": "Milvus killed",
+      "evidence_links": [
+        {
+          "evidence_id": "ev-1",
+          "source_type": "log",
+          "polarity": "support",
+          "description": "OOM log",
+          "relevance_score": 0.9
+        }
+      ]
+    }
+  ]
+}
+```"""
+        backend = MockLLMBackend(responses=[fenced_output, finish_output])
+        agent = BoundedReActAgent(sample_bundle, llm=backend, max_steps=3)
+        report = agent.run()
+        assert report.status == "diagnosed"
+        assert report.primary_root_cause == "OOM Crash"
+        assert len(agent.scratchpad) == 1
+        assert agent.scratchpad[0]["action"] == "log_search"
+
+    def test_malformed_llm_output_graceful_handling(self, sample_bundle):
+        # Raw text without valid JSON should not crash the agent
+        unparseable = "I cannot determine what tool to call, but there appears to be an issue in milvus-db."
+        backend = MockLLMBackend(responses=[unparseable])
+        agent = BoundedReActAgent(sample_bundle, llm=backend, max_steps=2)
+        report = agent.run()
+        assert report is not None
+        assert agent.state in (AgentState.TERMINATED, AgentState.ABSTAINED)
+
 
 # =====================================================================
 # 4. CLI Tests
@@ -369,4 +438,12 @@ class TestCLI:
         IncidentReader.save_bundle(sample_bundle, inc_dir)
 
         exit_code = main(["triage", str(inc_dir), "--mock"])
+        assert exit_code == 0
+
+    def test_cli_models_command(self):
+        parser = build_parser()
+        args = parser.parse_args(["models"])
+        assert args.command == "models"
+
+        exit_code = main(["models"])
         assert exit_code == 0

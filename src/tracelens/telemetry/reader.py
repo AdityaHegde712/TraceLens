@@ -4,8 +4,8 @@ Parses standardized JSON bundles containing incident manifests, logs, traces,
 metrics, service configurations, and markdown operational runbooks.
 """
 
-from dataclasses import dataclass, field
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from tracelens.models.telemetry import (

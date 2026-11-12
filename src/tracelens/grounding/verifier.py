@@ -6,6 +6,7 @@ and enforces calibrated abstention policies against contradictions.
 """
 
 from typing import Any, Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from tracelens.models.triage import EvidencePolarity, Hypothesis

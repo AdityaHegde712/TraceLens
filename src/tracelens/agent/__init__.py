@@ -5,6 +5,7 @@ from tracelens.agent.llm_backend import (
     MockLLMBackend,
     OllamaBackend,
     OpenAIBackend,
+    create_backend,
 )
 from tracelens.agent.react_loop import (
     AgentState,
@@ -20,16 +21,17 @@ from tracelens.agent.tools import (
 )
 
 __all__ = [
+    "AgentState",
+    "BaseDiagnosticTool",
+    "BoundedReActAgent",
+    "ConfigLookupTool",
     "LLMBackend",
+    "LogSearchTool",
+    "MetricQueryTool",
     "MockLLMBackend",
     "OllamaBackend",
     "OpenAIBackend",
-    "AgentState",
-    "BoundedReActAgent",
-    "BaseDiagnosticTool",
-    "LogSearchTool",
-    "TraceInspectTool",
-    "MetricQueryTool",
-    "ConfigLookupTool",
     "RunbookRetrieveTool",
+    "TraceInspectTool",
+    "create_backend",
 ]

@@ -2,6 +2,8 @@ README.md
 pyproject.toml
 src/tracelens/__init__.py
 src/tracelens/cli.py
+src/tracelens/config.py
+src/tracelens/discovery.py
 src/tracelens.egg-info/PKG-INFO
 src/tracelens.egg-info/SOURCES.txt
 src/tracelens.egg-info/dependency_links.txt
@@ -13,6 +15,8 @@ src/tracelens/agent/llm_backend.py
 src/tracelens/agent/react_loop.py
 src/tracelens/agent/tools.py
 src/tracelens/evaluation/__init__.py
+src/tracelens/evaluation/benchmark.py
+src/tracelens/evaluation/metrics.py
 src/tracelens/fault_lab/__init__.py
 src/tracelens/fault_lab/generator.py
 src/tracelens/grounding/__init__.py
@@ -26,3 +30,4 @@ src/tracelens/telemetry/reader.py
 src/tracelens/telemetry/sanitizer.py
 src/tracelens/telemetry/trace_dag.py
 src/tracelens/web/__init__.py
+src/tracelens/web/server.py

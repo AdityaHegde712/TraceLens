@@ -9,6 +9,7 @@
 
 # Agent tasks & workspaces
 .agent-tasks/
+reports
 
 # Python
 __pycache__/

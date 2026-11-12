@@ -2,10 +2,11 @@
 
 import argparse
 import sys
+
 from rich.console import Console
 from rich.table import Table
 
-from tracelens.agent.llm_backend import MockLLMBackend, OllamaBackend, OpenAIBackend
+from tracelens.agent.llm_backend import create_backend
 from tracelens.agent.react_loop import BoundedReActAgent
 from tracelens.telemetry.reader import IncidentReader
 from tracelens.telemetry.trace_dag import TraceDAG
@@ -45,6 +46,10 @@ def build_parser() -> argparse.ArgumentParser:
     ui_parser.add_argument("--host", default="127.0.0.1", help="Server bind host")
     ui_parser.add_argument("--port", type=int, default=8000, help="Server bind port")
     ui_parser.add_argument("--reload", action="store_true", help="Enable live code reloading")
+
+    # Models command
+    models_parser = subparsers.add_parser("models", help="Discover and list free models")
+    models_parser.add_argument("--api-key", default=None, help="Optional OpenRouter API key")
 
     return parser
 
@@ -88,19 +93,12 @@ def handle_triage(args: argparse.Namespace, console: Console) -> int:
     bundle = IncidentReader.load_bundle(args.incident_dir)
 
     # Configure backend
-    if args.mock:
-        backend = MockLLMBackend()
-    elif args.api_key:
-        backend = OpenAIBackend(
-            model=args.model,
-            api_key=args.api_key,
-            base_url=args.base_url or "https://api.openai.com/v1",
-        )
-    else:
-        backend = OllamaBackend(
-            model=args.model,
-            base_url=args.base_url or "http://localhost:11434",
-        )
+    model_name = "mock" if args.mock else args.model
+    backend = create_backend(
+        model=model_name,
+        api_key=args.api_key,
+        base_url=args.base_url,
+    )
 
     agent = BoundedReActAgent(bundle, llm=backend, max_steps=args.max_steps)
     console.print(f"[bold]Starting TraceLens triage on incident {bundle.manifest.incident_id}...[/bold]")
@@ -166,6 +164,30 @@ def handle_ui(args: argparse.Namespace, console: Console) -> int:
     return 0
 
 
+def handle_models(args: argparse.Namespace, console: Console) -> int:
+    """Discover and display available free LLM models."""
+    from tracelens.discovery import discover_free_models
+
+    console.print("[bold cyan]Querying active free models...[/bold cyan]")
+    models = discover_free_models(api_key=args.api_key)
+
+    table = Table(title="Available Free Tier & Local Models")
+    table.add_column("Model ID", style="cyan")
+    table.add_column("Name", style="green")
+    table.add_column("Context", style="magenta")
+    table.add_column("Params", style="yellow")
+
+    for m in models:
+        table.add_row(
+            m["id"],
+            m.get("name", m["id"]),
+            f"{m.get('context_length', 0):,}" if m.get("context_length") else "N/A",
+            m.get("params") or "N/A",
+        )
+    console.print(table)
+    return 0
+
+
 def main(args: list[str] | None = None) -> int:
     """Entry point for the tracelens command-line tool."""
     parser = build_parser()
@@ -180,6 +202,8 @@ def main(args: list[str] | None = None) -> int:
         return handle_benchmark(parsed_args, console)
     elif parsed_args.command == "ui":
         return handle_ui(parsed_args, console)
+    elif parsed_args.command == "models":
+        return handle_models(parsed_args, console)
 
     return 1
 

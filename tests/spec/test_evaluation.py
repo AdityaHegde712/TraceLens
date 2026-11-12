@@ -8,6 +8,7 @@ Strict TDD suite locking behavior for:
 """
 
 from pathlib import Path
+
 import pytest
 
 from tracelens.evaluation.benchmark import (
@@ -26,7 +27,6 @@ from tracelens.evaluation.metrics import (
 from tracelens.models.triage import (
     TriageReport,
 )
-
 
 # =====================================================================
 # 1. Metric Calculators Tests

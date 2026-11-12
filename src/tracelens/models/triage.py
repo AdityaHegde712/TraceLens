@@ -6,6 +6,7 @@ information-gain check proposals, and calibrated triage reports.
 
 from enum import Enum
 from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 

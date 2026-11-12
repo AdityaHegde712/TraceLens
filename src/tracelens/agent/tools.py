@@ -31,7 +31,6 @@ class BaseDiagnosticTool(ABC):
     @abstractmethod
     def execute(self, **kwargs: Any) -> Any:
         """Execute the tool operation."""
-        pass
 
 
 class LogSearchTool(BaseDiagnosticTool):

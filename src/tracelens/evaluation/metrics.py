@@ -6,6 +6,7 @@ and indirect prompt injection vulnerabilities.
 """
 
 from typing import Any
+
 from tracelens.models.triage import TriageReport
 
 STOPWORDS = {

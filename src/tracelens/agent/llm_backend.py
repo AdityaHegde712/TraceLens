@@ -6,6 +6,7 @@ local Ollama instances, and OpenAI-compatible inference APIs.
 
 from abc import ABC, abstractmethod
 from typing import Any
+
 import httpx
 
 
@@ -23,7 +24,6 @@ class LLMBackend(ABC):
         Returns:
             Generated response string.
         """
-        pass
 
 
 class MockLLMBackend(LLMBackend):
@@ -140,3 +140,54 @@ class OpenAIBackend(LLMBackend):
                     return str(choices[0]["message"].get("content", ""))
                 return ""
         return ""
+
+
+def create_backend(
+    model: str = "mock",
+    base_url: str | None = None,
+    api_key: str | None = None,
+    **kwargs: Any,
+) -> LLMBackend:
+    """Create and return the appropriate LLM backend adapter.
+
+    Args:
+        model: Model name/slug or 'mock'.
+        base_url: Optional base endpoint URL.
+        api_key: Optional API key.
+        **kwargs: Extra backend arguments.
+
+    Returns:
+        Configured LLMBackend instance.
+    """
+    from tracelens.config import get_settings
+
+    settings = get_settings()
+
+    if model == "mock":
+        return MockLLMBackend(**kwargs)
+
+    is_cloud = (
+        "/" in model
+        or ":free" in model
+        or bool(api_key)
+        or (base_url is not None and "openrouter" in base_url)
+        or model.startswith(("gpt-", "claude-", "openrouter"))
+    )
+
+    if is_cloud:
+        effective_key = api_key if api_key is not None else settings.OPENROUTER_API_KEY
+        effective_url = base_url if base_url is not None else settings.OPENROUTER_BASE_URL
+        return OpenAIBackend(
+            model=model,
+            api_key=effective_key,
+            base_url=effective_url,
+            **kwargs,
+        )
+
+    effective_url = base_url if base_url is not None else settings.OLLAMA_BASE_URL
+    return OllamaBackend(
+        model=model,
+        base_url=effective_url,
+        **kwargs,
+    )
+

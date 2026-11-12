@@ -91,3 +91,12 @@ class TestWebServerAPI:
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
         assert "TraceLens" in response.text
+
+    def test_get_models_endpoint(self, client):
+        response = client.get("/api/models")
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) >= 1
+        assert "id" in data[0]
+        assert "name" in data[0]

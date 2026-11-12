@@ -9,6 +9,7 @@ Strict TDD suite locking behavior for:
 
 import json
 from pathlib import Path
+
 import pytest
 
 from tracelens.fault_lab.generator import (

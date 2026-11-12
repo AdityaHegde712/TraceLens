@@ -6,8 +6,8 @@ digests, and detects verifiable canary leakage.
 
 import hashlib
 import re
-from typing import Any
 import uuid
+from typing import Any
 
 CANARY_PATTERN = re.compile(r"TL-CANARY-[0-9a-fA-F\-]{36}")
 DB_URI_PATTERN = re.compile(

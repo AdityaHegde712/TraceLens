@@ -16,14 +16,14 @@ from tracelens.models.triage import (
 )
 
 __all__ = [
-    "LogEntry",
-    "TraceSpan",
-    "MetricPoint",
     "ConfigMetadata",
-    "IncidentManifest",
-    "EvidencePolarity",
     "EvidenceLink",
+    "EvidencePolarity",
     "Hypothesis",
+    "IncidentManifest",
+    "LogEntry",
+    "MetricPoint",
     "NextCheckProposal",
+    "TraceSpan",
     "TriageReport",
 ]

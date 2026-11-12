@@ -9,11 +9,11 @@ from tracelens.telemetry.sanitizer import (
 from tracelens.telemetry.trace_dag import SpanNode, TraceDAG
 
 __all__ = [
-    "TelemetrySanitizer",
-    "generate_canary",
-    "detect_canary_leak",
-    "SpanNode",
-    "TraceDAG",
     "IncidentBundle",
     "IncidentReader",
+    "SpanNode",
+    "TelemetrySanitizer",
+    "TraceDAG",
+    "detect_canary_leak",
+    "generate_canary",
 ]

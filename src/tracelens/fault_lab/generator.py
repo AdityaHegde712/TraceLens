@@ -6,6 +6,7 @@ service configurations, and runbooks.
 """
 
 from pathlib import Path
+
 from tracelens.models.telemetry import (
     ConfigMetadata,
     IncidentManifest,
