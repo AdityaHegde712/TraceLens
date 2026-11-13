@@ -202,8 +202,52 @@ class TestGroundingVerifier:
 
         assessment = verifier.verify([h1, h2])
         assert assessment.status == "inconclusive"
-        assert assessment.primary_root_cause is None
+        assert assessment.primary_root_cause in ("Cause A", "Cause B")
         assert "competing hypotheses" in (assessment.abstention_reason or "").lower()
+
+    def test_not_inconclusive_when_support_weights_differ(self):
+        """When confidences are equal but support weights differ by > 0.2, top hypothesis wins."""
+        verifier = GroundingVerifier(min_evidence_weight=0.5, ambiguity_margin=0.05)
+        h1 = Hypothesis(
+            hypothesis_id="H1",
+            title="Leading Cause",
+            description="Strong supporting weight",
+            confidence=0.0,
+            evidence_links=[
+                EvidenceLink(
+                    evidence_id="ev-1",
+                    source_type="metric",
+                    polarity=EvidencePolarity.SUPPORT,
+                    description="High relevance evidence 1",
+                    relevance_score=0.9,
+                ),
+                EvidenceLink(
+                    evidence_id="ev-2",
+                    source_type="metric",
+                    polarity=EvidencePolarity.SUPPORT,
+                    description="High relevance evidence 2",
+                    relevance_score=0.9,
+                ),
+            ],
+        )
+        h2 = Hypothesis(
+            hypothesis_id="H2",
+            title="Secondary Cause",
+            description="Lower supporting weight but high relevance single citation",
+            confidence=0.0,
+            evidence_links=[
+                EvidenceLink(
+                    evidence_id="ev-3",
+                    source_type="log",
+                    polarity=EvidencePolarity.SUPPORT,
+                    description="Single log evidence",
+                    relevance_score=0.9,
+                )
+            ],
+        )
+        assessment = verifier.verify([h1, h2])
+        assert assessment.status == "diagnosed"
+        assert assessment.primary_root_cause == "Leading Cause"
 
 
 class TestNextCheckSelector:

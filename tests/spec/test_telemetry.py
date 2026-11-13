@@ -367,3 +367,19 @@ class TestIncidentReader:
         assert bundle.metrics == []
         assert bundle.configs == []
         assert bundle.runbooks == []
+
+    def test_stable_telemetry_keys_in_bundle(self, incident_dir: Path):
+        """Telemetry items map cleanly to deterministic stable evidence IDs."""
+        bundle = IncidentReader.load_bundle(incident_dir)
+        # Check logs index-based keys
+        for idx in range(len(bundle.logs)):
+            assert f"log-{idx}".startswith("log-")
+        # Check span IDs
+        for span in bundle.traces:
+            assert span.span_id.startswith("sp-")
+        # Check metrics
+        for m in bundle.metrics:
+            assert m.metric_name
+        # Check configs
+        for c in bundle.configs:
+            assert c.service

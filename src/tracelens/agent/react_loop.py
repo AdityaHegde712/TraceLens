@@ -56,6 +56,8 @@ Available tools:
 - runbook_retrieve: args: {query?: str}
 - finish: args: {hypotheses: list[Hypothesis]}
 
+When referencing evidence in hypotheses, set evidence_id to the exact evidence_id provided in the tool observation (e.g. 'log-0', 'sp-001-1', 'metric-rag_corpus_staleness_hours', 'config-etl-pipeline').
+
 Output format: Return valid JSON with keys:
 {
   "thought": "Your diagnostic reasoning",
@@ -221,6 +223,8 @@ class BoundedReActAgent:
                 f"Scratchpad History:\n{json.dumps(self.scratchpad, indent=2)}\n\n"
                 "You have completed your diagnostic tool calls or reached your step budget. "
                 "Based on the scratchpad history above, provide your final assessment now. "
+                "When referencing evidence in hypotheses, set evidence_id to the exact evidence_id provided "
+                "in the tool observation (e.g. 'log-0', 'sp-001-1', 'metric-rag_corpus_staleness_hours', 'config-etl-pipeline'). "
                 "Output valid JSON with action: 'finish' and 'hypotheses': [...] citing the observed evidence."
             )
             synthesis_output = self.llm.generate(prompt=synthesis_prompt, system_prompt=SYSTEM_PROMPT)
@@ -258,13 +262,89 @@ class BoundedReActAgent:
 
     def _build_prompt(self, symptom: str) -> str:
         """Construct context scratchpad prompt for LLM."""
-        return (
-            f"Incident: {self.bundle.manifest.title}\n"
-            f"Reported Symptom: {symptom}\n"
-            f"Services Involved: {', '.join(self.bundle.manifest.services_involved)}\n\n"
-            f"Scratchpad History:\n{json.dumps(self.scratchpad, indent=2)}\n\n"
-            f"Current step {self.step_count + 1} of {self.max_steps}. What is your next thought and action?"
-        )
+        prompt_parts = [
+            f"Incident: {self.bundle.manifest.title}",
+            f"Reported Symptom: {symptom}",
+            f"Services Involved: {', '.join(self.bundle.manifest.services_involved)}",
+            "",
+        ]
+
+        if self.max_steps == 1:
+            overview: dict[str, Any] = {}
+            # Error / warning logs or first logs with stable evidence_ids
+            err_logs = []
+            for idx, log in enumerate(self.bundle.logs):
+                if log.level.upper() in ("ERROR", "WARN", "WARNING"):
+                    err_logs.append({
+                        "evidence_id": f"log-{idx}",
+                        "service": log.service,
+                        "level": log.level,
+                        "message": log.message,
+                    })
+            if err_logs:
+                overview["error_warn_logs"] = err_logs
+            elif self.bundle.logs:
+                overview["logs"] = [
+                    {
+                        "evidence_id": f"log-{idx}",
+                        "service": log.service,
+                        "level": log.level,
+                        "message": log.message,
+                    }
+                    for idx, log in enumerate(self.bundle.logs[:5])
+                ]
+
+            # Critical path / bottleneck spans
+            if self.bundle.traces:
+                from tracelens.telemetry.trace_dag import TraceDAG
+
+                dag = TraceDAG.from_spans(self.bundle.traces)
+                critical_path = dag.find_critical_path()
+                overview["critical_path_spans"] = [
+                    {
+                        "evidence_id": node.span.span_id,
+                        "span_id": node.span.span_id,
+                        "name": node.span.name,
+                        "duration_ms": node.duration_ms,
+                        "status": node.span.status,
+                    }
+                    for node in critical_path
+                ]
+
+            # Metric points
+            if self.bundle.metrics:
+                overview["metrics"] = [
+                    {
+                        "evidence_id": f"metric-{m.metric_name}",
+                        "metric_name": m.metric_name,
+                        "value": m.value,
+                        "labels": m.labels,
+                    }
+                    for m in self.bundle.metrics
+                ]
+
+            # Configs
+            if self.bundle.configs:
+                overview["configs"] = [
+                    {
+                        "evidence_id": f"config-{c.service}",
+                        "service": c.service,
+                        "version": c.version,
+                    }
+                    for c in self.bundle.configs
+                ]
+
+            prompt_parts.extend([
+                f"Initial Telemetry Overview:\n{json.dumps(overview, indent=2)}",
+                "",
+            ])
+
+        prompt_parts.extend([
+            f"Scratchpad History:\n{json.dumps(self.scratchpad, indent=2)}",
+            "",
+            f"Current step {self.step_count + 1} of {self.max_steps}. What is your next thought and action?",
+        ])
+        return "\n".join(prompt_parts)
 
     def _parse_llm_output(self, raw: str) -> dict[str, Any]:
         """Safely extract structured JSON payload from LLM response.

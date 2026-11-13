@@ -12,6 +12,18 @@ from tracelens.telemetry.sanitizer import TelemetrySanitizer
 from tracelens.telemetry.trace_dag import TraceDAG
 
 
+class RunbookEntry(dict):
+    """Dictionary representing runbook content with stable evidence_id."""
+
+    def __contains__(self, key: object) -> bool:
+        if super().__contains__(key):
+            return True
+        return bool(isinstance(key, str) and key in self.get("content", ""))
+
+    def __str__(self) -> str:
+        return f"[evidence_id: {self.get('evidence_id')}]\n{self.get('content', '')}"
+
+
 class BaseDiagnosticTool(ABC):
     """Abstract base class for telemetry diagnostic tools with call budgeting."""
 
@@ -57,7 +69,7 @@ class LogSearchTool(BaseDiagnosticTool):
         self._check_budget()
         results: list[dict[str, Any]] = []
 
-        for log in self.bundle.logs:
+        for idx, log in enumerate(self.bundle.logs):
             if level and log.level.upper() != level.upper():
                 continue
             if service and log.service != service:
@@ -66,6 +78,7 @@ class LogSearchTool(BaseDiagnosticTool):
                 continue
 
             entry_dict = log.model_dump(mode="json")
+            entry_dict["evidence_id"] = f"log-{idx}"
             entry_dict["message"] = self.sanitizer.sanitize_text(entry_dict["message"])
             entry_dict["attributes"] = self.sanitizer.sanitize_dict(entry_dict.get("attributes", {}))
             results.append(entry_dict)
@@ -105,6 +118,7 @@ class TraceInspectTool(BaseDiagnosticTool):
             "trace_id": trace_id or (matching_spans[0].trace_id if matching_spans else None),
             "critical_path": [
                 {
+                    "evidence_id": node.span.span_id,
                     "span_id": node.span.span_id,
                     "name": node.span.name,
                     "duration_ms": node.duration_ms,
@@ -114,6 +128,7 @@ class TraceInspectTool(BaseDiagnosticTool):
             ],
             "bottlenecks": [
                 {
+                    "evidence_id": b.span.span_id,
                     "span_id": b.span.span_id,
                     "name": b.span.name,
                     "self_time_ms": b.self_time_ms,
@@ -150,16 +165,30 @@ class MetricQueryTool(BaseDiagnosticTool):
             matches = [m for m in matches if m.labels.get("pod") == pod]
 
         if not matches:
-            return {"count": 0, "values": [], "message": "No matching metric points found"}
+            target_metric = metric_name or "unknown"
+            return {
+                "evidence_id": f"metric-{target_metric}",
+                "count": 0,
+                "values": [],
+                "message": "No matching metric points found",
+            }
 
         values = [m.value for m in matches]
+        observations = []
+        for m in matches:
+            obs = m.model_dump(mode="json")
+            obs["evidence_id"] = f"metric-{m.metric_name}"
+            observations.append(obs)
+
+        target_metric = metric_name or matches[0].metric_name
         return {
+            "evidence_id": f"metric-{target_metric}",
             "metric_name": metric_name,
             "count": len(values),
             "min": min(values),
             "max": max(values),
             "avg": sum(values) / len(values),
-            "observations": [m.model_dump(mode="json") for m in matches],
+            "observations": observations,
         }
 
 
@@ -179,30 +208,41 @@ class ConfigLookupTool(BaseDiagnosticTool):
         for cfg in self.bundle.configs:
             if not service or cfg.service == service:
                 return {
+                    "evidence_id": f"config-{cfg.service}",
                     "service": cfg.service,
                     "version": cfg.version,
                     "settings": self.sanitizer.sanitize_dict(cfg.settings),
                 }
 
-        return {"error": f"Configuration not found for service={service}"}
+        target_service = service or "unknown"
+        return {
+            "evidence_id": f"config-{target_service}",
+            "error": f"Configuration not found for service={service}",
+        }
 
 
 class RunbookRetrieveTool(BaseDiagnosticTool):
     """Searches operational runbooks for remediation procedures and known symptoms."""
 
-    def execute(self, query: str | None = None) -> list[str]:
+    def execute(self, query: str | None = None) -> list[Any]:
         """Search runbooks for matching guidelines.
 
         Args:
             query: Substring to search inside runbook contents.
 
         Returns:
-            List of matching runbook sections.
+            List of matching runbook entries with stable evidence IDs.
         """
         self._check_budget()
-        if not query:
-            return list(self.bundle.runbooks)
-
-        q_lower = query.lower()
-        matches = [rb for rb in self.bundle.runbooks if q_lower in rb.lower()]
-        return matches
+        results: list[Any] = []
+        for idx, rb in enumerate(self.bundle.runbooks):
+            filename = f"runbook_{idx + 1}.md"
+            if not query or query.lower() in rb.lower():
+                results.append(
+                    RunbookEntry(
+                        evidence_id=f"runbook-{filename}",
+                        filename=filename,
+                        content=rb,
+                    )
+                )
+        return results

@@ -101,11 +101,11 @@ class GroundingVerifier:
             w_ref = sum(e.relevance_score for e in refuting)
             w_total = w_sup + w_ref
 
-            if w_total > 0.0:
-                net_score = (w_sup - self.refutation_lambda * w_ref) / w_total
-                net_conf = max(0.0, min(1.0, net_score))
-            else:
-                net_conf = 0.0
+            weight_factor = min(1.0, w_sup / max(self.min_evidence_weight, 1.0))
+            net_conf = weight_factor * max(
+                0.0,
+                min(1.0, (w_sup - self.refutation_lambda * w_ref) / max(w_total, 1e-6)),
+            )
 
             # Update hypothesis counts and calibrated confidence
             h.confidence = net_conf
@@ -178,12 +178,15 @@ class GroundingVerifier:
         # Rule 4: Ambiguous competing hypotheses
         if len(evaluated_hypotheses) > 1:
             second_h = evaluated_hypotheses[1]
+            second_w_sup = bipartite_graph[second_h.hypothesis_id]["support_weight"]
             if (
                 abs(top_h.confidence - second_h.confidence) <= self.ambiguity_margin
+                and abs(top_w_sup - second_w_sup) <= 0.2
                 and second_h.confidence >= self.min_confidence_threshold
             ):
                 return GroundingAssessment(
                     status="inconclusive",
+                    primary_root_cause=top_h.title,
                     confidence=top_h.confidence,
                     hypotheses=evaluated_hypotheses,
                     bipartite_graph=bipartite_graph,

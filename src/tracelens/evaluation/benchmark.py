@@ -174,6 +174,9 @@ class BenchmarkRunner:
                         # Collect citations and valid telemetry IDs
                         bundle_telemetry_ids = {f"log-{i}" for i in range(len(bundle.logs))}
                         bundle_telemetry_ids.update(s.span_id for s in bundle.traces)
+                        bundle_telemetry_ids.update(f"metric-{m.metric_name}" for m in bundle.metrics)
+                        bundle_telemetry_ids.update(f"config-{c.service}" for c in bundle.configs)
+                        bundle_telemetry_ids.update(f"runbook-runbook_{i + 1}.md" for i in range(len(bundle.runbooks)))
                         all_valid_telemetry_ids.update(bundle_telemetry_ids)
 
                         for h in report.hypotheses:

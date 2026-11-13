@@ -44,7 +44,11 @@ class IncidentReader:
         """
         path = Path(dir_path)
         if not path.exists() or not path.is_dir():
-            raise FileNotFoundError(f"Incident bundle directory not found: {path}")
+            fallback = Path("data/fixtures/incidents") / dir_path
+            if fallback.exists() and fallback.is_dir():
+                path = fallback
+            else:
+                raise FileNotFoundError(f"Incident bundle directory not found: {path}")
 
         # 1. Manifest (required)
         manifest_file = path / "manifest.json"

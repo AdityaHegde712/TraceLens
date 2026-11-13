@@ -209,14 +209,18 @@ class TestDiagnosticTools:
         milvus_logs = tool.execute(service="milvus-db")
         assert len(milvus_logs) == 1
         assert "Out of memory" in milvus_logs[0]["message"]
+        assert milvus_logs[0]["evidence_id"] == "log-1"
 
         # Search by level
         error_logs = tool.execute(level="ERROR")
         assert len(error_logs) == 2
+        assert error_logs[0]["evidence_id"] == "log-1"
+        assert error_logs[1]["evidence_id"] == "log-2"
 
         # Search by substring
         query_logs = tool.execute(query="Incoming request")
         assert len(query_logs) == 1
+        assert query_logs[0]["evidence_id"] == "log-0"
 
     def test_trace_inspect_tool(self, sample_bundle):
         tool = TraceInspectTool(sample_bundle)
@@ -225,19 +229,24 @@ class TestDiagnosticTools:
         assert "critical_path" in result
         assert "bottlenecks" in result
         assert len(result["critical_path"]) == 3
+        assert result["critical_path"][0]["evidence_id"] == result["critical_path"][0]["span_id"]
         assert result["bottlenecks"][0]["span_id"] == "sp-2"
+        assert result["bottlenecks"][0]["evidence_id"] == "sp-2"
 
     def test_metric_query_tool(self, sample_bundle):
         tool = MetricQueryTool(sample_bundle)
         result = tool.execute(metric_name="container_memory_bytes")
+        assert result["evidence_id"] == "metric-container_memory_bytes"
         assert result["count"] == 2
         assert result["min"] == 8000000000.0
         assert result["max"] == 16500000000.0
         assert result["avg"] == 12250000000.0
+        assert result["observations"][0]["evidence_id"] == "metric-container_memory_bytes"
 
     def test_config_lookup_tool_sanitization(self, sample_bundle):
         tool = ConfigLookupTool(sample_bundle)
         result = tool.execute(service="milvus-db")
+        assert result["evidence_id"] == "config-milvus-db"
         assert result["service"] == "milvus-db"
         assert result["version"] == "v2.4.1"
         # Secret api_key must be sanitized
@@ -250,6 +259,7 @@ class TestDiagnosticTools:
         results = tool.execute(query="exit code 137")
         assert len(results) == 1
         assert "Milvus OOM Troubleshooting" in results[0]
+        assert results[0]["evidence_id"] == "runbook-runbook_1.md"
 
     def test_tool_call_budget_enforcement(self, sample_bundle):
         tool = LogSearchTool(sample_bundle, max_budget=2)
@@ -353,6 +363,17 @@ class TestBoundedReActLoop:
         assert report.primary_root_cause == "Milvus Compaction OOM"
         assert len(backend.history) == 2
         assert "completed your diagnostic tool calls or reached your step budget" in backend.history[1]["prompt"]
+
+    def test_fixed_context_initial_telemetry_overview(self, sample_bundle):
+        """Fixed context mode (max_steps=1) attaches Initial Telemetry Overview to the prompt."""
+        backend = MockLLMBackend()
+        agent = BoundedReActAgent(sample_bundle, llm=backend, max_steps=1)
+        prompt = agent._build_prompt("504 gateway timeout")
+
+        assert "Initial Telemetry Overview:" in prompt
+        assert "log-1" in prompt
+        assert "sp-2" in prompt or "sp-1" in prompt
+        assert "metric-container_memory_bytes" in prompt
 
     def test_complete_triage_flow_diagnosed(self, sample_bundle):
         """A normal triage workflow finishes with a grounded TriageReport."""
