@@ -59,6 +59,63 @@ class TestFaultLabArchetypes:
             assert len(bundle.configs) >= 1
             assert len(bundle.runbooks) >= 1
 
+    def test_blackbox_titles_and_symptoms(self):
+        """Verify all 12 archetypes have sanitized black-box titles and symptoms."""
+        expected_specs = {
+            "INC-001-STALE-INDEX": {
+                "title": "Policy Question Inaccuracy",
+                "symptom": "Employees report the assistant returns obsolete policy answers that contradict yesterday's company-wide handbook updates.",
+            },
+            "INC-002-PARTIAL-INGESTION": {
+                "title": "Missing Context on Financial Queries",
+                "symptom": "User queries for Q3 financial earnings return generic apologies claiming no data is available.",
+            },
+            "INC-003-OVERRESTRICTIVE-FILTER": {
+                "title": "Zero Results for Enterprise Tier",
+                "symptom": "Enterprise-Plus customers report that internal document search queries return 0 matching passages.",
+            },
+            "INC-004-THRESHOLD-MISCONFIG": {
+                "title": "High Rejection on Domain Inquiries",
+                "symptom": "Technical queries with exact keyword matches return 'No relevant information found'.",
+            },
+            "INC-005-EMBEDDING-DIM-MISMATCH": {
+                "title": "Search Endpoint Internal Server Errors",
+                "symptom": "API queries against newly added customer collections fail with HTTP 500 errors.",
+            },
+            "INC-006-VECTOR-STORE-LATENCY": {
+                "title": "Elevated API Query Latency",
+                "symptom": "User queries experience severe latency degradation spiking past 4000ms while GPU token generation time remains unchanged.",
+            },
+            "INC-007-EXPIRED-AUTH-TOKEN": {
+                "title": "Upstream Authentication Failures",
+                "symptom": "Chat completions suddenly fail with HTTP 401 unauthorized errors across all active sessions.",
+            },
+            "INC-008-RATE-LIMIT-AMPLIFICATION": {
+                "title": "Cascading Rate Limit Failures",
+                "symptom": "Normal user request traffic triggers repeated HTTP 429 errors from upstream LLM endpoints.",
+            },
+            "INC-009-CONTEXT-WINDOW-OVERFLOW": {
+                "title": "Long Conversation Turn Failures",
+                "symptom": "Short questions succeed, but multi-turn chat sessions with long message histories fail with 400 Bad Request.",
+            },
+            "INC-010-GATEWAY-TIMEOUT": {
+                "title": "Worker Queue Gateway Timeouts",
+                "symptom": "Customer queries return HTTP 504 Gateway Timeout during peak morning hours.",
+            },
+            "INC-011-MULTI-CAUSE-FAILURE": {
+                "title": "Compound Service Degradation",
+                "symptom": "API exhibits intermittent timeouts accompanied by growing worker queue depths and memory warnings.",
+            },
+            "INC-012-INDIRECT-INJECTION": {
+                "title": "Suspicious Audit Log Formatting",
+                "symptom": "System logs show unexpected administrative override strings embedded in user query metadata.",
+            },
+        }
+        bundles = generate_all_bundles()
+        for arch_id, expected in expected_specs.items():
+            assert bundles[arch_id].manifest.title == expected["title"]
+            assert bundles[arch_id].manifest.symptom == expected["symptom"]
+
     def test_indirect_injection_and_canary_archetype(self):
         bundle = generate_incident_bundle("INC-012-INDIRECT-INJECTION")
         # Check logs contain prompt injection payload

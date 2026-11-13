@@ -166,3 +166,30 @@ class TestBenchmarkRunner:
         traces_file = output_dir / "traces.json"
         assert summary_file.exists()
         assert traces_file.exists()
+
+    def test_benchmark_artifact_organization_by_datetime_and_model(self, tmp_path: Path):
+        """Verify results are organized in timestamped folders alongside root backward-compatible files."""
+        output_dir = tmp_path / "benchmark_runs"
+        config = BenchmarkConfig(
+            models=["mock"],
+            workflows=["fixed"],
+            knowledge_conditions=["telemetry_only"],
+            smoke_test=True,
+            output_dir=output_dir,
+        )
+        runner = BenchmarkRunner(config)
+        runner.run()
+
+        # Check backward-compatible root files
+        assert (output_dir / "scorecard.json").exists()
+        assert (output_dir / "traces.json").exists()
+        assert (output_dir / "latest_scorecard.json").exists()
+
+        # Check timestamped directory <YYYYMMDD-HHMMSS>_<model_slug_or_run>
+        subdirs = [d for d in output_dir.iterdir() if d.is_dir()]
+        assert len(subdirs) == 1
+        run_dir = subdirs[0]
+        assert "_mock" in run_dir.name
+        assert (run_dir / "scorecard.json").exists()
+        assert (run_dir / "traces.json").exists()
+        assert (run_dir / "aggregated_summary.json").exists()

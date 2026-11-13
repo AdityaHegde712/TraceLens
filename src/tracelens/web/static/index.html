@@ -212,7 +212,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 260px;
+      min-height: 280px;
+      max-height: 520px;
       overflow-y: auto;
     }
     .step-item {
@@ -231,15 +232,19 @@
     }
     .step-thought { color: var(--text); font-style: italic; margin-bottom: 4px; }
     .step-obs {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 6px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      padding: 8px 10px;
       font-family: var(--font-mono);
       font-size: 11px;
-      color: #a3e635;
-      max-height: 80px;
+      line-height: 1.45;
+      color: #bef264;
+      max-height: 140px;
       overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     /* Right Sidebar: Grounding Scorecard */
@@ -449,6 +454,32 @@
       activeIncidentId = incId;
       document.querySelectorAll(".incident-item").forEach(el => el.classList.remove("active"));
       if (element) element.classList.add("active");
+
+      // Reset ReAct execution stream & verdict scorecard on incident switch
+      const streamEl = document.getElementById("reactStream");
+      if (streamEl) {
+        streamEl.innerHTML = '<div style="color: var(--text-muted); font-style: italic;">Ready to initiate diagnostic investigation.</div>';
+      }
+      const badge = document.getElementById("agentStateBadge");
+      if (badge) {
+        badge.className = "badge badge-ok";
+        badge.innerText = "INIT";
+      }
+      const banner = document.getElementById("verdictBanner");
+      if (banner) {
+        banner.className = "status-banner status-diagnosed";
+        banner.innerText = "READY";
+      }
+      const confVal = document.getElementById("confidenceVal");
+      if (confVal) confVal.innerText = "0%";
+      const confBar = document.getElementById("confidenceBar");
+      if (confBar) confBar.style.width = "0%";
+      const evList = document.getElementById("evidenceList");
+      if (evList) {
+        evList.innerHTML = '<div style="color: var(--text-muted); font-style: italic;">No evidence citations evaluated.</div>';
+      }
+      const nextQuery = document.getElementById("nextCheckQuery");
+      if (nextQuery) nextQuery.innerText = "None";
 
       try {
         const res = await fetch(`/api/incidents/${incId}`);

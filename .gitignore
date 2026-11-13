@@ -28,6 +28,7 @@ venv.bak/
 .pytest_cache/
 .coverage
 htmlcov/
+errors/
 
 # Node / Frontend / Build
 node_modules/

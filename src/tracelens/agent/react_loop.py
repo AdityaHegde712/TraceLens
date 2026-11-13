@@ -212,6 +212,29 @@ class BoundedReActAgent:
             self.step_count += 1
             self.state = AgentState.THINKING
 
+        # Forced Hypothesis Synthesis on Budget Exhaustion / Empty Hypotheses / Fixed Context
+        if not candidate_hypotheses:
+            synthesis_prompt = (
+                f"Incident: {self.bundle.manifest.title}\n"
+                f"Reported Symptom: {active_symptom}\n"
+                f"Services Involved: {', '.join(self.bundle.manifest.services_involved)}\n\n"
+                f"Scratchpad History:\n{json.dumps(self.scratchpad, indent=2)}\n\n"
+                "You have completed your diagnostic tool calls or reached your step budget. "
+                "Based on the scratchpad history above, provide your final assessment now. "
+                "Output valid JSON with action: 'finish' and 'hypotheses': [...] citing the observed evidence."
+            )
+            synthesis_output = self.llm.generate(prompt=synthesis_prompt, system_prompt=SYSTEM_PROMPT)
+            parsed_synthesis = self._parse_llm_output(synthesis_output)
+            candidate_hypotheses = self._extract_hypotheses(parsed_synthesis)
+            if parsed_synthesis.get("thought"):
+                self.scratchpad.append({
+                    "step": self.step_count + 1,
+                    "thought": parsed_synthesis.get("thought", ""),
+                    "action": "finish",
+                    "args": {},
+                    "observation": f"Synthesized {len(candidate_hypotheses)} candidate hypotheses.",
+                })
+
         # 4. Evaluating Grounding and Final Synthesis
         self.state = AgentState.EVALUATING_GROUNDING
         assessment = self.verifier.verify(candidate_hypotheses)

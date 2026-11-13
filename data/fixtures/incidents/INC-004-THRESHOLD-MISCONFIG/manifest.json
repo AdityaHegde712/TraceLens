@@ -1,7 +1,7 @@
 {
   "incident_id": "INC-004-THRESHOLD-MISCONFIG",
-  "title": "High Similarity Threshold Misconfiguration",
-  "symptom": "System repeatedly returns 'No relevant information found' for valid questions",
+  "title": "High Rejection on Domain Inquiries",
+  "symptom": "Technical queries with exact keyword matches return 'No relevant information found'.",
   "start_time": "2026-10-15T11:00:00Z",
   "end_time": "2026-10-15T11:30:00Z",
   "ground_truth_root_cause": "Cosine similarity cutoff threshold accidentally changed from 0.65 to 0.95 in service config",

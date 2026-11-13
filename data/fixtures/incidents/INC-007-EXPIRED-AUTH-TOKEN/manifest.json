@@ -1,7 +1,7 @@
 {
   "incident_id": "INC-007-EXPIRED-AUTH-TOKEN",
-  "title": "Expired Upstream Provider API Credential",
-  "symptom": "HTTP 401 Unauthorized across all LLM synthesis requests",
+  "title": "Upstream Authentication Failures",
+  "symptom": "Chat completions suddenly fail with HTTP 401 unauthorized errors across all active sessions.",
   "start_time": "2026-10-15T14:00:00Z",
   "end_time": "2026-10-15T14:15:00Z",
   "ground_truth_root_cause": "OpenAI platform service account API key expired after 90-day rotation cycle without secret update",

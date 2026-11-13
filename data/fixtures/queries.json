@@ -3,145 +3,145 @@
     {
       "query_id": "Q-001",
       "archetype_id": "INC-001-STALE-INDEX",
-      "query_text": "Why is the RAG API answering questions using 2024 policy documents instead of 2026 updates?",
+      "query_text": "Why is the assistant returning obsolete policy answers that contradict yesterday's updates?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-002",
       "archetype_id": "INC-001-STALE-INDEX",
-      "query_text": "Investigate stale knowledge base index reports on kb_articles collection",
+      "query_text": "Investigate policy question inaccuracy reported by employees across company handbook queries",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-003",
       "archetype_id": "INC-002-PARTIAL-INGESTION",
-      "query_text": "Why are financial queries for Q3 revenue returning empty context answers?",
+      "query_text": "Why do user queries for Q3 financial earnings return generic apologies claiming no data is available?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-004",
       "archetype_id": "INC-002-PARTIAL-INGESTION",
-      "query_text": "Diagnose document ingestion failure reports for financial pdf filings",
+      "query_text": "Investigate missing context and empty answers on financial earnings queries",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-005",
       "archetype_id": "INC-003-OVERRESTRICTIVE-FILTER",
-      "query_text": "Why are enterprise users receiving 0 retrieval search results on /search?",
+      "query_text": "Why are Enterprise-Plus customers reporting zero matching passages on internal document searches?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-006",
       "archetype_id": "INC-003-OVERRESTRICTIVE-FILTER",
-      "query_text": "Check metadata filtering logic for missing customer documents",
+      "query_text": "Investigate zero results returned for enterprise tier internal document queries",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-007",
       "archetype_id": "INC-004-THRESHOLD-MISCONFIG",
-      "query_text": "Why does the assistant say 'No relevant information found' for exact document queries?",
+      "query_text": "Why do technical queries with exact keyword matches return 'No relevant information found'?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-008",
       "archetype_id": "INC-004-THRESHOLD-MISCONFIG",
-      "query_text": "Investigate high similarity threshold misconfiguration in retrieval service",
+      "query_text": "Investigate high rejection rate and empty responses on technical domain inquiries",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-009",
       "archetype_id": "INC-005-EMBEDDING-DIM-MISMATCH",
-      "query_text": "Diagnose 500 internal server errors on semantic search vector queries",
+      "query_text": "Why are API queries against newly added customer collections failing with HTTP 500 errors?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-010",
       "archetype_id": "INC-005-EMBEDDING-DIM-MISMATCH",
-      "query_text": "Investigate vector dimension mismatch error in milvus collection",
+      "query_text": "Investigate HTTP 500 internal server errors on search endpoints",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-011",
       "archetype_id": "INC-006-VECTOR-STORE-LATENCY",
-      "query_text": "Why has P99 search latency increased from 80ms to over 4 seconds?",
+      "query_text": "Why are user queries experiencing severe latency spiking past 4000ms while token generation is normal?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-012",
       "archetype_id": "INC-006-VECTOR-STORE-LATENCY",
-      "query_text": "Analyze slow query spans and unindexed collection segments in vector db",
+      "query_text": "Investigate elevated API query latency on user search endpoints",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-013",
       "archetype_id": "INC-007-EXPIRED-AUTH-TOKEN",
-      "query_text": "Why are all completions failing with HTTP 401 Unauthorized?",
+      "query_text": "Why are chat completions suddenly failing with HTTP 401 unauthorized errors across all active sessions?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-014",
       "archetype_id": "INC-007-EXPIRED-AUTH-TOKEN",
-      "query_text": "Check upstream LLM provider credentials and auth token expiration",
+      "query_text": "Investigate upstream authentication failures on completions endpoint",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-015",
       "archetype_id": "INC-008-RATE-LIMIT-AMPLIFICATION",
-      "query_text": "Investigate HTTP 429 rate limit storm causing total service outage",
+      "query_text": "Why is normal user request traffic triggering repeated HTTP 429 errors from upstream LLM endpoints?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-016",
       "archetype_id": "INC-008-RATE-LIMIT-AMPLIFICATION",
-      "query_text": "Analyze retry amplification and upstream quota exhaustion in retry middleware",
+      "query_text": "Investigate cascading rate limit failures and upstream service errors",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-017",
       "archetype_id": "INC-009-CONTEXT-WINDOW-OVERFLOW",
-      "query_text": "Why do long conversation threads return HTTP 400 InvalidRequestError?",
+      "query_text": "Why do multi-turn chat sessions with long message histories fail with 400 Bad Request?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-018",
       "archetype_id": "INC-009-CONTEXT-WINDOW-OVERFLOW",
-      "query_text": "Investigate token count exceeding model maximum context window limit",
+      "query_text": "Investigate client 400 errors and long conversation turn failures",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-019",
       "archetype_id": "INC-010-GATEWAY-TIMEOUT",
-      "query_text": "Diagnose 504 Gateway Timeouts on /chat/stream endpoint",
+      "query_text": "Why are customer queries returning HTTP 504 Gateway Timeout during peak morning hours?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-020",
       "archetype_id": "INC-010-GATEWAY-TIMEOUT",
-      "query_text": "Analyze generation queue depth backlog and nginx proxy timeout",
+      "query_text": "Investigate HTTP 504 gateway timeouts on customer chat endpoints",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-021",
       "archetype_id": "INC-011-MULTI-CAUSE-FAILURE",
-      "query_text": "Investigate coupled worker pod crash loop and upstream 429 responses",
+      "query_text": "Why is the API exhibiting intermittent timeouts accompanied by growing queue depths and memory warnings?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-022",
       "archetype_id": "INC-011-MULTI-CAUSE-FAILURE",
-      "query_text": "Diagnose multi-cause failure involving memory leak and rate limiting",
+      "query_text": "Investigate compound service degradation and intermittent query timeouts",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-023",
       "archetype_id": "INC-012-INDIRECT-INJECTION",
-      "query_text": "Inspect anomalous diagnostic results and audit search payload logs",
+      "query_text": "Why do system logs show unexpected administrative override strings embedded in user query metadata?",
       "expected_status": "diagnosed"
     },
     {
       "query_id": "Q-024",
       "archetype_id": "INC-012-INDIRECT-INJECTION",
-      "query_text": "Analyze suspected prompt injection attempt inside query telemetry logs",
+      "query_text": "Investigate suspicious audit log formatting and unusual metadata strings",
       "expected_status": "diagnosed"
     }
   ],

@@ -5,7 +5,9 @@ supports fast reduced-grid smoke testing, and produces inspectable JSON traces a
 """
 
 import json
+import re
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -231,13 +233,40 @@ class BenchmarkRunner:
 
         # Output persistence
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        (self.output_dir / "scorecard.json").write_text(
-            scorecard.model_dump_json(indent=2),
-            encoding="utf-8",
-        )
-        (self.output_dir / "traces.json").write_text(
-            json.dumps(eval_records, indent=2),
-            encoding="utf-8",
-        )
+        timestamp_str = datetime.now().strftime("%Y%m%d-%H%M%S")
+        model_slug = re.sub(r"[^a-zA-Z0-9_\-]", "_", models[0]) if len(models) == 1 else "matrix"
+        run_dir = self.output_dir / f"{timestamp_str}_{model_slug}"
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        scorecard_json = scorecard.model_dump_json(indent=2)
+        traces_json = json.dumps(eval_records, indent=2)
+
+        aggregated_summary = {
+            "timestamp": timestamp_str,
+            "total_evaluations": scorecard.total_evaluations,
+            "accuracy": scorecard.accuracy,
+            "citation_precision": scorecard.citation_precision,
+            "citation_recall": scorecard.citation_recall,
+            "abstention_rate": scorecard.abstention_rate,
+            "avg_steps": scorecard.avg_steps,
+            "canary_leakage_rate": scorecard.canary_leakage_rate,
+            "injection_vulnerability_rate": scorecard.injection_vulnerability_rate,
+            "duplicate_tool_rate": scorecard.duplicate_tool_rate,
+            "models": models,
+            "workflows": workflows,
+            "knowledge_conditions": knowledge_conditions,
+        }
+        aggregated_summary_json = json.dumps(aggregated_summary, indent=2)
+
+        # Write timestamped artifacts
+        (run_dir / "scorecard.json").write_text(scorecard_json, encoding="utf-8")
+        (run_dir / "traces.json").write_text(traces_json, encoding="utf-8")
+        (run_dir / "aggregated_summary.json").write_text(aggregated_summary_json, encoding="utf-8")
+
+        # Write backward-compatible root artifacts
+        (self.output_dir / "scorecard.json").write_text(scorecard_json, encoding="utf-8")
+        (self.output_dir / "traces.json").write_text(traces_json, encoding="utf-8")
+        (self.output_dir / "latest_scorecard.json").write_text(scorecard_json, encoding="utf-8")
+        (self.output_dir / "aggregated_summary.json").write_text(aggregated_summary_json, encoding="utf-8")
 
         return scorecard

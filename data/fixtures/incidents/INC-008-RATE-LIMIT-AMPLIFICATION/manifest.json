@@ -1,7 +1,7 @@
 {
   "incident_id": "INC-008-RATE-LIMIT-AMPLIFICATION",
-  "title": "Rate Limit Amplification & Retry Storm",
-  "symptom": "Surge in HTTP 429 errors cascading into total pipeline downtime",
+  "title": "Cascading Rate Limit Failures",
+  "symptom": "Normal user request traffic triggers repeated HTTP 429 errors from upstream LLM endpoints.",
   "start_time": "2026-10-15T15:00:00Z",
   "end_time": "2026-10-15T15:30:00Z",
   "ground_truth_root_cause": "Aggressive exponential retry policy without jitter overwhelmed upstream LLM rate limit quota (TPM exceeded)",

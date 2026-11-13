@@ -312,6 +312,48 @@ class TestBoundedReActLoop:
         assert agent.step_count == 3
         assert agent.state in (AgentState.TERMINATED, AgentState.ABSTAINED)
 
+    def test_forced_hypothesis_synthesis_on_budget_exhaustion(self, sample_bundle):
+        """When budget exhausted without finish, agent forces hypothesis synthesis prompt."""
+        step_outputs = [
+            '{"thought": "Search for error logs in milvus", "action": "log_search", "args": {"level": "ERROR", "service": "milvus-db"}}',
+            """{
+                "thought": "Forced synthesis: Milvus OOM crash confirmed.",
+                "action": "finish",
+                "hypotheses": [
+                    {
+                        "hypothesis_id": "H-SYNTH-1",
+                        "title": "Milvus Compaction OOM",
+                        "description": "Milvus pod killed by cgroup OOM during compaction",
+                        "evidence_links": [
+                            {
+                                "evidence_id": "ev-log-1",
+                                "source_type": "log",
+                                "polarity": "support",
+                                "description": "Out of memory kill process 501",
+                                "relevance_score": 0.95
+                            },
+                            {
+                                "evidence_id": "ev-metric-1",
+                                "source_type": "metric",
+                                "polarity": "support",
+                                "description": "Memory reached 16.5GB hitting 16GB limit",
+                                "relevance_score": 0.9
+                            }
+                        ]
+                    }
+                ]
+            }""",
+        ]
+        backend = MockLLMBackend(responses=step_outputs)
+        agent = BoundedReActAgent(sample_bundle, llm=backend, max_steps=1)
+        report = agent.run(symptom="Search queries failing with HTTP 500")
+
+        assert agent.step_count == 1
+        assert report.status == "diagnosed"
+        assert report.primary_root_cause == "Milvus Compaction OOM"
+        assert len(backend.history) == 2
+        assert "completed your diagnostic tool calls or reached your step budget" in backend.history[1]["prompt"]
+
     def test_complete_triage_flow_diagnosed(self, sample_bundle):
         """A normal triage workflow finishes with a grounded TriageReport."""
         responses = [
