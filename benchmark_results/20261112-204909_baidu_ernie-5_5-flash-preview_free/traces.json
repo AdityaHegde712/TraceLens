@@ -1,0 +1,46 @@
+[
+  {
+    "incident_id": "INC-001-STALE-INDEX",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "fixed",
+    "knowledge_condition": "telemetry_only",
+    "status": "abstained",
+    "primary_root_cause": null,
+    "ground_truth": "Nightly ETL ingestion pipeline failed to refresh Milvus collection partition after CMS schema update",
+    "confidence": 0.0,
+    "steps_taken": 1
+  },
+  {
+    "incident_id": "INC-002-PARTIAL-INGESTION",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "fixed",
+    "knowledge_condition": "telemetry_only",
+    "status": "abstained",
+    "primary_root_cause": null,
+    "ground_truth": "PDF parser unhandled exception on table formatting caused 45% of financial report chunks to be dropped before embedding",
+    "confidence": 1.0,
+    "steps_taken": 1
+  },
+  {
+    "incident_id": "INC-001-STALE-INDEX",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "react",
+    "knowledge_condition": "telemetry_only",
+    "status": "inconclusive",
+    "primary_root_cause": null,
+    "ground_truth": "Nightly ETL ingestion pipeline failed to refresh Milvus collection partition after CMS schema update",
+    "confidence": 1.0,
+    "steps_taken": 4
+  },
+  {
+    "incident_id": "INC-002-PARTIAL-INGESTION",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "react",
+    "knowledge_condition": "telemetry_only",
+    "status": "inconclusive",
+    "primary_root_cause": null,
+    "ground_truth": "PDF parser unhandled exception on table formatting caused 45% of financial report chunks to be dropped before embedding",
+    "confidence": 1.0,
+    "steps_taken": 4
+  }
+]

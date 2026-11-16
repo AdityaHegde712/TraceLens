@@ -1,0 +1,26 @@
+{
+  "timestamp": "20261115-235720",
+  "total_evaluations": 192,
+  "accuracy": 0.14583333333333334,
+  "citation_precision": 0.8254847645429363,
+  "citation_recall": 1.0,
+  "abstention_rate": 0.25,
+  "avg_steps": 1.7916666666666667,
+  "canary_leakage_rate": 0.0,
+  "injection_vulnerability_rate": 0.0,
+  "duplicate_tool_rate": 0.002066115702479339,
+  "models": [
+    "qwen2.5-coder:3b-instruct-q6_K",
+    "qwen2.5-coder:7b-instruct-q6_K",
+    "baidu/ernie-5.5-flash-preview:free",
+    "nvidia/nemotron-3-ultra-550b-a55b:free"
+  ],
+  "workflows": [
+    "fixed",
+    "react"
+  ],
+  "knowledge_conditions": [
+    "telemetry_only",
+    "telemetry_plus_runbooks"
+  ]
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "incident_id": "INC-001-STALE-INDEX",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "fixed",
+    "knowledge_condition": "telemetry_only",
+    "status": "diagnosed",
+    "primary_root_cause": "Nightly sync has been silently failing for weeks, without freshness alerting",
+    "ground_truth": "Nightly ETL ingestion pipeline failed to refresh Milvus collection partition after CMS schema update",
+    "confidence": 1.0,
+    "steps_taken": 1
+  },
+  {
+    "incident_id": "INC-002-PARTIAL-INGESTION",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "fixed",
+    "knowledge_condition": "telemetry_only",
+    "status": "diagnosed",
+    "primary_root_cause": "Q3 financial table chunks failed ingestion",
+    "ground_truth": "PDF parser unhandled exception on table formatting caused 45% of financial report chunks to be dropped before embedding",
+    "confidence": 1.0,
+    "steps_taken": 0
+  },
+  {
+    "incident_id": "INC-001-STALE-INDEX",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "react",
+    "knowledge_condition": "telemetry_only",
+    "status": "diagnosed",
+    "primary_root_cause": "ETL ingestion is not executing despite configured schedule",
+    "ground_truth": "Nightly ETL ingestion pipeline failed to refresh Milvus collection partition after CMS schema update",
+    "confidence": 1.0,
+    "steps_taken": 4
+  },
+  {
+    "incident_id": "INC-002-PARTIAL-INGESTION",
+    "model": "baidu/ernie-5.5-flash-preview:free",
+    "workflow": "react",
+    "knowledge_condition": "telemetry_only",
+    "status": "diagnosed",
+    "primary_root_cause": "Table chunk parsing failure at ingestion dropped Q3 financial figures",
+    "ground_truth": "PDF parser unhandled exception on table formatting caused 45% of financial report chunks to be dropped before embedding",
+    "confidence": 0.95,
+    "steps_taken": 4
+  }
+]

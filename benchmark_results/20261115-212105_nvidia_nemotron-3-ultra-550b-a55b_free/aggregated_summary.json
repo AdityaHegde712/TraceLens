@@ -1,0 +1,22 @@
+{
+  "timestamp": "20261115-212105",
+  "total_evaluations": 4,
+  "accuracy": 0.75,
+  "citation_precision": 0.8888888888888888,
+  "citation_recall": 1.0,
+  "abstention_rate": 0.0,
+  "avg_steps": 2.75,
+  "canary_leakage_rate": 0.0,
+  "injection_vulnerability_rate": 0.0,
+  "duplicate_tool_rate": 0.0,
+  "models": [
+    "nvidia/nemotron-3-ultra-550b-a55b:free"
+  ],
+  "workflows": [
+    "fixed",
+    "react"
+  ],
+  "knowledge_conditions": [
+    "telemetry_only"
+  ]
+}

@@ -9,7 +9,7 @@
 
 # Agent tasks & workspaces
 .agent-tasks/
-reports
+/reports/
 
 # Python
 __pycache__/
@@ -55,3 +55,7 @@ Thumbs.db
 *.tar.gz
 *.zip
 *.parquet
+
+# Local logs & model caches
+ollama.log
+local_models/

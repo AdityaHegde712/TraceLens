@@ -1,0 +1,98 @@
+{
+  "total_evaluations": 192,
+  "accuracy": 0.14583333333333334,
+  "citation_precision": 0.8254847645429363,
+  "citation_recall": 1.0,
+  "abstention_rate": 0.25,
+  "canary_leakage_rate": 0.0,
+  "injection_vulnerability_rate": 0.0,
+  "avg_steps": 1.7916666666666667,
+  "duplicate_tool_rate": 0.002066115702479339,
+  "matrix_breakdown": {
+    "evaluations_count": 192,
+    "models": [
+      "qwen2.5-coder:3b-instruct-q6_K",
+      "qwen2.5-coder:7b-instruct-q6_K",
+      "baidu/ernie-5.5-flash-preview:free",
+      "nvidia/nemotron-3-ultra-550b-a55b:free"
+    ],
+    "workflows": [
+      "fixed",
+      "react"
+    ],
+    "knowledge_conditions": [
+      "telemetry_only",
+      "telemetry_plus_runbooks"
+    ],
+    "by_model": {
+      "qwen2.5-coder:3b-instruct-q6_K": {
+        "evaluations": 48,
+        "accuracy": 0.0,
+        "citation_precision": 0.34782608695652173,
+        "citation_recall": 1.0,
+        "abstention_rate": 0.5208333333333334,
+        "avg_steps": 0.625,
+        "duplicate_tool_rate": 0.0,
+        "injection_vulnerability_rate": 0.0
+      },
+      "qwen2.5-coder:7b-instruct-q6_K": {
+        "evaluations": 48,
+        "accuracy": 0.08333333333333333,
+        "citation_precision": 0.7808219178082192,
+        "citation_recall": 1.0,
+        "abstention_rate": 0.1875,
+        "avg_steps": 1.5833333333333333,
+        "duplicate_tool_rate": 0.008620689655172414,
+        "injection_vulnerability_rate": 0.0
+      },
+      "baidu/ernie-5.5-flash-preview:free": {
+        "evaluations": 48,
+        "accuracy": 0.22916666666666666,
+        "citation_precision": 0.9640718562874252,
+        "citation_recall": 1.0,
+        "abstention_rate": 0.0625,
+        "avg_steps": 2.2291666666666665,
+        "duplicate_tool_rate": 0.0,
+        "injection_vulnerability_rate": 0.0
+      },
+      "nvidia/nemotron-3-ultra-550b-a55b:free": {
+        "evaluations": 48,
+        "accuracy": 0.2708333333333333,
+        "citation_precision": 0.8533333333333334,
+        "citation_recall": 1.0,
+        "abstention_rate": 0.22916666666666666,
+        "avg_steps": 2.7291666666666665,
+        "duplicate_tool_rate": 0.0,
+        "injection_vulnerability_rate": 0.0
+      }
+    },
+    "by_workflow": {
+      "fixed": {
+        "evaluations": 96,
+        "accuracy": 0.13541666666666666,
+        "abstention_rate": 0.2604166666666667,
+        "avg_steps": 0.6666666666666666,
+        "duplicate_tool_rate": 0.0
+      },
+      "react": {
+        "evaluations": 96,
+        "accuracy": 0.15625,
+        "abstention_rate": 0.23958333333333334,
+        "avg_steps": 2.9166666666666665,
+        "duplicate_tool_rate": 0.0029411764705882353
+      }
+    },
+    "by_condition": {
+      "telemetry_only": {
+        "evaluations": 96,
+        "accuracy": 0.16666666666666666,
+        "abstention_rate": 0.28125
+      },
+      "telemetry_plus_runbooks": {
+        "evaluations": 96,
+        "accuracy": 0.125,
+        "abstention_rate": 0.21875
+      }
+    }
+  }
+}

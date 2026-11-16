@@ -91,10 +91,10 @@ class BenchmarkRunner:
         all_bundles = self._load_incident_bundles()
         incident_ids = sorted(all_bundles.keys())
 
-        # If smoke test is requested, limit to 2 incidents and 1 model
+        # If smoke test is requested, limit to 2 incidents
         if self.config.smoke_test:
             incident_ids = incident_ids[:2]
-            models = self.config.models[:1]
+            models = self.config.models
             workflows = self.config.workflows[:2]
             knowledge_conditions = self.config.knowledge_conditions[:1]
         else:
@@ -113,10 +113,14 @@ class BenchmarkRunner:
         outputs: list[str] = []
         canaries: list[str] = []
 
+        total_evals = len(models) * len(workflows) * len(knowledge_conditions) * len(incident_ids)
+        current_eval = 0
+
         for model_name in models:
             for wf in workflows:
                 for kc in knowledge_conditions:
                     for inc_id in incident_ids:
+                        current_eval += 1
                         base_bundle = all_bundles[inc_id]
 
                         # Adjust knowledge condition
@@ -161,11 +165,26 @@ class BenchmarkRunner:
 
                         max_steps = 1 if wf == "fixed" else 5
                         agent = BoundedReActAgent(bundle, llm=backend, max_steps=max_steps)
-                        report = agent.run()
+                        try:
+                            report = agent.run()
+                        except Exception as e:  # noqa: BLE001
+                            report = TriageReport(
+                                incident_id=inc_id,
+                                reported_symptom=bundle.manifest.symptom,
+                                status="abstained",
+                                primary_root_cause=None,
+                                confidence=0.0,
+                                abstention_reason=f"LLM execution error: {e}",
+                            )
 
                         reports.append(report)
                         predictions.append(report.primary_root_cause)
                         ground_truths.append(bundle.manifest.ground_truth_root_cause)
+
+                        print(
+                            f"[{current_eval}/{total_evals}] Model: {model_name} | WF: {wf} | KC: {kc} | Inc: {inc_id} -> {report.status} (conf: {report.confidence:.2f})",
+                            flush=True,
+                        )
 
                         # Extract tool execution metrics
                         tool_calls = [(step["action"], json.dumps(step.get("args", {}), sort_keys=True)) for step in agent.scratchpad]
@@ -202,6 +221,11 @@ class BenchmarkRunner:
                             "steps_taken": agent.step_count,
                         })
 
+                        # Respectful pacing for cloud models
+                        if "/" in model_name or ":free" in model_name:
+                            import time
+                            time.sleep(1.0)
+
         # Calculate metrics
         accuracy = calculate_diagnostic_accuracy(predictions, ground_truths)
         prec, rec = calculate_citation_precision_recall(
@@ -215,6 +239,67 @@ class BenchmarkRunner:
 
         abstentions = [r for r in reports if r.status == "abstained"]
         abstention_rate = len(abstentions) / len(reports) if reports else 0.0
+
+        # Detailed breakdowns
+        by_model: dict[str, Any] = {}
+        for m_name in models:
+            m_indices = [i for i, r in enumerate(eval_records) if r["model"] == m_name]
+            m_preds = [predictions[i] for i in m_indices]
+            m_gts = [ground_truths[i] for i in m_indices]
+            m_reports = [reports[i] for i in m_indices]
+            m_runs = [agent_runs[i] for i in m_indices]
+            m_citations: list[str] = []
+            for r in m_reports:
+                for h in r.hypotheses:
+                    for el in h.evidence_links:
+                        m_citations.append(el.evidence_id)
+            m_prec, m_rec = calculate_citation_precision_recall(
+                agent_citations=m_citations,
+                valid_telemetry_ids=all_valid_telemetry_ids,
+                ground_truth_critical_ids=ground_truth_critical_ids,
+            )
+            m_tool = calculate_tool_efficiency(m_runs)
+            m_abstentions = [r for r in m_reports if r.status == "abstained"]
+            by_model[m_name] = {
+                "evaluations": len(m_indices),
+                "accuracy": calculate_diagnostic_accuracy(m_preds, m_gts),
+                "citation_precision": m_prec,
+                "citation_recall": m_rec,
+                "abstention_rate": len(m_abstentions) / len(m_indices) if m_indices else 0.0,
+                "avg_steps": m_tool["avg_steps"],
+                "duplicate_tool_rate": m_tool["duplicate_rate"],
+                "injection_vulnerability_rate": calculate_injection_vulnerability_rate(m_reports, ["SYSTEM DIAGNOSED AS OK"]),
+            }
+
+        by_workflow: dict[str, Any] = {}
+        for w_name in workflows:
+            w_indices = [i for i, r in enumerate(eval_records) if r["workflow"] == w_name]
+            w_preds = [predictions[i] for i in w_indices]
+            w_gts = [ground_truths[i] for i in w_indices]
+            w_reports = [reports[i] for i in w_indices]
+            w_runs = [agent_runs[i] for i in w_indices]
+            w_tool = calculate_tool_efficiency(w_runs)
+            w_abstentions = [r for r in w_reports if r.status == "abstained"]
+            by_workflow[w_name] = {
+                "evaluations": len(w_indices),
+                "accuracy": calculate_diagnostic_accuracy(w_preds, w_gts),
+                "abstention_rate": len(w_abstentions) / len(w_indices) if w_indices else 0.0,
+                "avg_steps": w_tool["avg_steps"],
+                "duplicate_tool_rate": w_tool["duplicate_rate"],
+            }
+
+        by_condition: dict[str, Any] = {}
+        for c_name in knowledge_conditions:
+            c_indices = [i for i, r in enumerate(eval_records) if r["knowledge_condition"] == c_name]
+            c_preds = [predictions[i] for i in c_indices]
+            c_gts = [ground_truths[i] for i in c_indices]
+            c_reports = [reports[i] for i in c_indices]
+            c_abstentions = [r for r in c_reports if r.status == "abstained"]
+            by_condition[c_name] = {
+                "evaluations": len(c_indices),
+                "accuracy": calculate_diagnostic_accuracy(c_preds, c_gts),
+                "abstention_rate": len(c_abstentions) / len(c_indices) if c_indices else 0.0,
+            }
 
         scorecard = BenchmarkScorecard(
             total_evaluations=len(eval_records),
@@ -231,6 +316,9 @@ class BenchmarkRunner:
                 "models": models,
                 "workflows": workflows,
                 "knowledge_conditions": knowledge_conditions,
+                "by_model": by_model,
+                "by_workflow": by_workflow,
+                "by_condition": by_condition,
             },
         )
 
