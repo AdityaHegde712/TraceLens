@@ -15,6 +15,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from tracelens.agent.chat import generate_chat_answer
 from tracelens.agent.llm_backend import create_backend
 from tracelens.agent.react_loop import BoundedReActAgent
 from tracelens.discovery import discover_free_models
@@ -47,6 +48,15 @@ class TriageRequest(BaseModel):
     model: str = Field(default="mock", description="Model backend (mock, ollama, openai)")
     workflow: str = Field(default="react", description="Workflow type (react or fixed)")
     api_key: str | None = Field(default=None, description="OpenAI API key")
+    base_url: str | None = Field(default=None, description="Inference endpoint base URL")
+
+
+class ChatRequest(BaseModel):
+    """Payload for post-triage follow-up investigation chat."""
+
+    message: str = Field(..., description="User question regarding incident telemetry")
+    model: str = Field(default="mock", description="Model backend (mock, ollama, openai)")
+    api_key: str | None = Field(default=None, description="OpenAI/OpenRouter API key")
     base_url: str | None = Field(default=None, description="Inference endpoint base URL")
 
 
@@ -127,6 +137,33 @@ def get_incident_detail(incident_id: str) -> dict[str, Any]:
         "configs": [cfg.model_dump(mode="json") for cfg in bundle.configs],
         "runbooks": bundle.runbooks,
         "dag_analysis": dag_analysis,
+    }
+
+
+@app.post("/api/incidents/{incident_id}/chat")
+def incident_chat(incident_id: str, payload: ChatRequest) -> dict[str, Any]:
+    """Answer follow-up investigation questions grounded in incident telemetry."""
+    bundle = _get_bundle(incident_id)
+
+    # Check for active triage report in SESSIONS
+    active_report: TriageReport | None = None
+    for session in SESSIONS.values():
+        if session.get("incident_id") == incident_id:
+            active_report = session.get("report")
+            break
+
+    answer = generate_chat_answer(
+        bundle=bundle,
+        question=payload.message,
+        report=active_report,
+        model=payload.model,
+        api_key=payload.api_key,
+        base_url=payload.base_url,
+    )
+
+    return {
+        "incident_id": incident_id,
+        "answer": answer,
     }
 
 

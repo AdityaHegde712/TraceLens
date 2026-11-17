@@ -24,10 +24,10 @@
 
 - **Benchmark Matrix**: Executed 192 live evaluations across 4 models, 2 workflows (`fixed` vs `react`), 2 knowledge conditions (`telemetry_only` vs `telemetry_plus_runbooks`), and 12 canonical incident archetypes (`INC-001` through `INC-012`).
 - **Granular Artifacts**:
-  - Scorecard: [`benchmark_results/scorecard.json`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/benchmark_results/scorecard.json)
-  - Traces: [`benchmark_results/traces.json`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/benchmark_results/traces.json)
-  - Adversarial Suite: [`benchmark_results/adversarial_evaluation.json`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/benchmark_results/adversarial_evaluation.json)
-  - Matrix Report: [`docs/reports/model_matrix_report.md`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/docs/reports/model_matrix_report.md)
+  - Scorecard: [`benchmark_results/scorecard.json`](../../benchmark_results/scorecard.json)
+  - Traces: [`benchmark_results/traces.json`](../../benchmark_results/traces.json)
+  - Adversarial Suite: [`benchmark_results/adversarial_evaluation.json`](../../benchmark_results/adversarial_evaluation.json)
+  - Matrix Report: [`docs/reports/model_matrix_report.md`](model_matrix_report.md)
 - **Trade-off Analysis & Honest Failure Reporting**:
   - Small local models (`qwen2.5-coder:3b`) suffer from high abstention (52.1%) and lower citation precision (34.8%), frequently falling back to safe abstention when unable to format complex JSON actions.
   - Frontier models (`nvidia/nemotron-3-ultra-550b-a55b:free`) achieve 27.1% accuracy and 85.3% citation precision, but require longer diagnostic steps (2.73 avg steps).
@@ -82,11 +82,11 @@ Tested against the 5 formal adversarial queries (ADV-001 through ADV-005) and in
 
 ## 6. Generated Visual Artifacts
 
-Publication-quality plots generated and available in [`docs/reports/figures/`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/docs/reports/figures/):
-1. **Accuracy vs. Step Efficiency**: [`accuracy_vs_steps.png`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/docs/reports/figures/accuracy_vs_steps.png)
-2. **Citation Precision vs. Recall**: [`citation_precision_recall.png`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/docs/reports/figures/citation_precision_recall.png)
-3. **Safety and Abstention Rates**: [`safety_and_abstention_rates.png`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/docs/reports/figures/safety_and_abstention_rates.png)
-4. **Workflow & Knowledge Breakdown**: [`workflow_condition_breakdown.png`](file:///C:/Users/hifia/Projects/SJSU_FALL_2026/NLP/Project/docs/reports/figures/workflow_condition_breakdown.png)
+Publication-quality plots generated and available in [`docs/reports/figures/`](figures/):
+1. **Accuracy vs. Step Efficiency**: [`accuracy_vs_steps.png`](figures/accuracy_vs_steps.png)
+2. **Citation Precision vs. Recall**: [`citation_precision_recall.png`](figures/citation_precision_recall.png)
+3. **Safety and Abstention Rates**: [`safety_and_abstention_rates.png`](figures/safety_and_abstention_rates.png)
+4. **Workflow & Knowledge Breakdown**: [`workflow_condition_breakdown.png`](figures/workflow_condition_breakdown.png)
 
 ---
 

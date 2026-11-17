@@ -100,3 +100,21 @@ class TestWebServerAPI:
         assert len(data) >= 1
         assert "id" in data[0]
         assert "name" in data[0]
+
+    def test_incident_chat_endpoint(self, client):
+        response = client.post(
+            "/api/incidents/INC-001-STALE-INDEX/chat",
+            json={"message": "What is the primary root cause and latency bottleneck?"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "answer" in data
+        assert isinstance(data["answer"], str)
+        assert len(data["answer"]) > 0
+
+    def test_cli_handle_chat(self):
+        from tracelens.cli import main
+
+        exit_code = main(["chat", "INC-001-STALE-INDEX", "What caused the incident?", "--mock"])
+        assert exit_code == 0
+

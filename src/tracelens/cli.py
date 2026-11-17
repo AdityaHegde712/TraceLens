@@ -2,13 +2,15 @@
 
 import argparse
 import sys
+from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
+from tracelens.agent.chat import generate_chat_answer
 from tracelens.agent.llm_backend import create_backend
 from tracelens.agent.react_loop import BoundedReActAgent
-from tracelens.telemetry.reader import IncidentReader
+from tracelens.telemetry.reader import IncidentBundle, IncidentReader
 from tracelens.telemetry.trace_dag import TraceDAG
 
 
@@ -50,6 +52,15 @@ def build_parser() -> argparse.ArgumentParser:
     # Models command
     models_parser = subparsers.add_parser("models", help="Discover and list free models")
     models_parser.add_argument("--api-key", default=None, help="Optional OpenRouter API key")
+
+    # Chat command
+    chat_parser = subparsers.add_parser("chat", help="Post-triage follow-up investigation chat")
+    chat_parser.add_argument("incident_dir_or_id", help="Path to incident dataset directory or archetype ID")
+    chat_parser.add_argument("question", help="Question about incident telemetry or remediation")
+    chat_parser.add_argument("--model", default="mock", help="LLM model identifier")
+    chat_parser.add_argument("--mock", action="store_true", help="Use deterministic mock LLM backend")
+    chat_parser.add_argument("--api-key", default=None, help="Inference API key for OpenAI-compatible providers")
+    chat_parser.add_argument("--base-url", default=None, help="Inference API base URL")
 
     return parser
 
@@ -188,6 +199,49 @@ def handle_models(args: argparse.Namespace, console: Console) -> int:
     return 0
 
 
+def _resolve_bundle(target: str) -> IncidentBundle:
+    """Resolve an incident bundle from either a filesystem directory path or archetype ID."""
+    from tracelens.fault_lab.generator import generate_all_bundles
+
+    path = Path(target)
+    if path.exists() and (path / "manifest.json").exists():
+        return IncidentReader.load_bundle(path)
+
+    fixtures_path = Path("data/fixtures/incidents") / target
+    if fixtures_path.exists() and (fixtures_path / "manifest.json").exists():
+        return IncidentReader.load_bundle(fixtures_path)
+
+    all_bundles = generate_all_bundles()
+    if target in all_bundles:
+        return all_bundles[target]
+
+    return IncidentReader.load_bundle(path)
+
+
+def handle_chat(args: argparse.Namespace, console: Console) -> int:
+    """Execute post-triage follow-up investigation chat and print grounded answer."""
+    bundle = _resolve_bundle(args.incident_dir_or_id)
+    model_name = "mock" if args.mock else args.model
+
+    console.print(
+        f"[bold cyan]TraceLens Post-Triage Chat[/bold cyan] - "
+        f"[bold]{bundle.manifest.incident_id}[/bold]: {bundle.manifest.title}"
+    )
+    console.print(f"[bold yellow]Question:[/bold yellow] {args.question}")
+
+    answer = generate_chat_answer(
+        bundle=bundle,
+        question=args.question,
+        model=model_name,
+        api_key=args.api_key,
+        base_url=args.base_url,
+    )
+
+    console.print("\n[bold green]Answer:[/bold green]")
+    console.print(answer)
+    return 0
+
+
 def main(args: list[str] | None = None) -> int:
     """Entry point for the tracelens command-line tool."""
     parser = build_parser()
@@ -204,6 +258,8 @@ def main(args: list[str] | None = None) -> int:
         return handle_ui(parsed_args, console)
     elif parsed_args.command == "models":
         return handle_models(parsed_args, console)
+    elif parsed_args.command == "chat":
+        return handle_chat(parsed_args, console)
 
     return 1
 

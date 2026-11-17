@@ -359,13 +359,25 @@
       </div>
 
       <!-- Critical-Path Trace DAG Analysis -->
-      <div class="card">
+      <div class="card" id="trace-container">
         <div class="card-title">
           <span>Critical-Path Trace DAG Visualizer</span>
           <span style="font-size: 11px; color: var(--text-muted);" id="traceStatus">0 Spans</span>
         </div>
         <div class="dag-container" id="dagContainer">
           <div style="color: var(--text-muted); font-style: italic;">No trace spans loaded.</div>
+        </div>
+        <hr style="border-color: #2e2e2e; margin: 16px 0;">
+        <div class="card-title">
+          <span>Post-Triage Investigation Chat</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Grounded Telemetry Q&A</span>
+        </div>
+        <div id="chat-messages" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-size: 12px;">
+          <div style="color: var(--text-muted); font-style: italic;">Ask any follow-up question regarding incident telemetry, trace bottlenecks, logs, or remediation steps.</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="chat-input" placeholder="e.g., Which span caused the latency spike?" style="flex: 1;" onkeydown="if(event.key==='Enter') submitChat()">
+          <button class="btn-primary" id="chat-submit-btn" onclick="submitChat()">Ask</button>
         </div>
       </div>
 
@@ -420,6 +432,7 @@
 
   <script>
     let activeIncidentId = null;
+    let currentIncidentId = null;
     let incidents = [];
 
     // Load available incidents from API
@@ -452,8 +465,15 @@
     // Select and inspect specific incident
     async function selectIncident(incId, element) {
       activeIncidentId = incId;
+      currentIncidentId = incId;
       document.querySelectorAll(".incident-item").forEach(el => el.classList.remove("active"));
       if (element) element.classList.add("active");
+
+      // Reset follow-up chat messages
+      const chatBox = document.getElementById("chat-messages");
+      if (chatBox) {
+        chatBox.innerHTML = '<div style="color: var(--text-muted); font-style: italic;">Ask any follow-up question regarding incident telemetry, trace bottlenecks, logs, or remediation steps.</div>';
+      }
 
       // Reset ReAct execution stream & verdict scorecard on incident switch
       const streamEl = document.getElementById("reactStream");
@@ -649,6 +669,72 @@
         });
       } catch (err) {
         console.warn("Could not load dynamic models, using defaults", err);
+      }
+    }
+
+    // Post-triage follow-up investigation chat submission
+    async function submitChat() {
+      const currentId = currentIncidentId || activeIncidentId;
+      if (!currentId) return;
+
+      const inputEl = document.getElementById("chat-input");
+      const submitBtn = document.getElementById("chat-submit-btn");
+      const message = inputEl.value.trim();
+      if (!message) return;
+
+      const chatContainer = document.getElementById("chat-messages");
+
+      // Append user bubble
+      const userDiv = document.createElement("div");
+      userDiv.style.cssText = "align-self: flex-end; background: #1e3a8a; color: #dbeafe; padding: 6px 10px; border-radius: 6px; max-width: 85%; font-size: 12px;";
+      userDiv.innerHTML = `<strong>You:</strong> <span></span>`;
+      userDiv.querySelector("span").innerText = message;
+      chatContainer.appendChild(userDiv);
+
+      inputEl.value = "";
+      inputEl.disabled = true;
+      submitBtn.disabled = true;
+      submitBtn.innerText = "...";
+
+      // Append loading indicator
+      const loadingDiv = document.createElement("div");
+      loadingDiv.id = "chat-loading-indicator";
+      loadingDiv.style.cssText = "align-self: flex-start; color: var(--text-muted); font-style: italic; font-size: 11px;";
+      loadingDiv.innerText = "TraceLens is formulating grounded answer...";
+      chatContainer.appendChild(loadingDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      const model = document.getElementById("modelSelect") ? document.getElementById("modelSelect").value : "mock";
+
+      try {
+        const res = await fetch(`/api/incidents/${currentIncidentId}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message,
+            model: model
+          })
+        });
+        const data = await res.json();
+        loadingDiv.remove();
+
+        const botDiv = document.createElement("div");
+        botDiv.style.cssText = "align-self: flex-start; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; max-width: 95%; white-space: pre-wrap; font-family: var(--font-mono); font-size: 11px; line-height: 1.45;";
+        botDiv.innerHTML = `<strong style="color: var(--accent);">TraceLens:</strong>\n<span></span>`;
+        botDiv.querySelector("span").innerText = data.answer || "No response received.";
+        chatContainer.appendChild(botDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } catch (err) {
+        loadingDiv.remove();
+        const errDiv = document.createElement("div");
+        errDiv.style.cssText = "align-self: flex-start; color: var(--danger); font-size: 11px;";
+        errDiv.innerText = "Error querying TraceLens: " + err.message;
+        chatContainer.appendChild(errDiv);
+      } finally {
+        inputEl.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Ask";
+        inputEl.focus();
       }
     }
 
