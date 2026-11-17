@@ -367,6 +367,17 @@
         <div class="dag-container" id="dagContainer">
           <div style="color: var(--text-muted); font-style: italic;">No trace spans loaded.</div>
         </div>
+      </div>
+
+      <!-- Live Bounded ReAct Execution Stream & Post-Triage Chat -->
+      <div class="card" id="react-container">
+        <div class="card-title">
+          <span>Live Bounded ReAct Diagnostic Loop</span>
+          <span class="badge badge-ok" id="agentStateBadge">IDLE</span>
+        </div>
+        <div class="react-stream" id="reactStream">
+          <div style="color: var(--text-muted); font-style: italic;">Ready to initiate diagnostic investigation.</div>
+        </div>
         <hr style="border-color: #2e2e2e; margin: 16px 0;">
         <div class="card-title">
           <span>Post-Triage Investigation Chat</span>
@@ -378,17 +389,6 @@
         <div style="display: flex; gap: 8px;">
           <input type="text" id="chat-input" placeholder="e.g., Which span caused the latency spike?" style="flex: 1;" onkeydown="if(event.key==='Enter') submitChat()">
           <button class="btn-primary" id="chat-submit-btn" onclick="submitChat()">Ask</button>
-        </div>
-      </div>
-
-      <!-- Live Bounded ReAct Execution Stream -->
-      <div class="card">
-        <div class="card-title">
-          <span>Live Bounded ReAct Diagnostic Loop</span>
-          <span class="badge badge-ok" id="agentStateBadge">IDLE</span>
-        </div>
-        <div class="react-stream" id="reactStream">
-          <div style="color: var(--text-muted); font-style: italic;">Ready to initiate diagnostic investigation.</div>
         </div>
       </div>
 
